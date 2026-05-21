@@ -52,6 +52,7 @@ python manage.py runserver
 - The original page structure and API routes are preserved so the frontend HTML and JavaScript can remain unchanged.
 - The project uses SQLite by default; Render deployments should use a managed Postgres database and set a `DATABASE_URL` environment variable.
 - `render.yaml` and `Procfile` are included for Render web hosting.
+- `ALLOWED_HOSTS` will accept `DJANGO_ALLOWED_HOSTS`, or default to `*` when not set.
 - Environment variables supported:
   - `DJANGO_SECRET_KEY`
   - `DJANGO_DEBUG`
