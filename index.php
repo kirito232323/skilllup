@@ -1,0 +1,4618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillUp - Integrated Skills Gap & Training Recommendation Platform</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Color Palette Overrides In Line With Workspace Aesthetic */
+        :root {
+            --primary-bg: #4f46e5;
+            --dark-bg: #090d16;
+            --accent-color: #f43f5e;
+            --text-dark: #f8fafc;
+            --text-light: #f1f5f9;
+            --border-color: #1e293b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --card-bg: #111827;
+            --surface-bg: #1f2937;
+            --stat-bg: #111827;
+            --theme-pill-bg: #1e1b4b;
+            --theme-pill-text: #818cf8;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-dark);
+        }
+
+        /* Layout Framework Adjustments */
+        .w-100 { width: 100%; }
+        .mt-10 { margin-top: 10px; }
+        .mt-20 { margin-top: 20px; }
+        .mb-10 { margin-bottom: 10px; }
+        .mb-20 { margin-bottom: 20px; }
+        .flex { display: flex; }
+        .gap-10 { gap: 10px; }
+        .gap-15 { gap: 15px; }
+        .gap-20 { gap: 20px; }
+        .justify-between { justify-content: space-between; }
+        .align-center { align-items: center; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .grid-profile { display: grid; grid-template-columns: 280px 1fr; gap: 30px; }
+        @media(max-width: 992px) { 
+            .grid-2, .grid-profile { grid-template-columns: 1fr; } 
+        }
+        
+        .nav-menu li a { cursor: pointer; display: flex; align-items: center; gap: 10px; }
+        .text-danger { color: var(--accent-color) !important; }
+        
+        /* High-Fidelity Form UI Elements */
+        .gform-canvas { max-width: 760px; margin: 0 auto; }
+        .gform-header-card { border-top: 8px solid var(--primary-bg); border-radius: 8px; background: var(--card-bg); padding: 24px; margin-bottom: 16px; border: 1px solid var(--border-color); }
+        .gform-card { background: var(--card-bg); border-radius: 8px; padding: 24px; margin-bottom: 16px; border: 1px solid var(--border-color); position: relative; }
+        .gform-footer { display: flex; justify-content: flex-end; gap: 15px; border-top: 1px solid var(--border-color); padding-top: 15px; margin-top: 15px; }
+        .gform-input-title { font-size: 24px; border: none; border-bottom: 1px solid var(--border-color); background: transparent; color: #fff; width: 100%; padding: 8px 0; font-weight: bold; }
+        .gform-input-title:focus { outline: none; border-bottom: 2px solid var(--primary-bg); }
+        .gform-input-desc { font-size: 14px; border: none; border-bottom: 1px solid var(--border-color); background: transparent; color: #aaa; width: 100%; padding: 8px 0; margin-top: 10px; }
+        .gform-input-desc:focus { outline: none; border-bottom: 2px solid var(--primary-bg); }
+        .gform-q-input { font-size: 16px; border: none; border-bottom: 1px solid var(--border-color); background: transparent; color: #fff; width: 100%; padding: 8px 0; font-weight: 500; }
+        .gform-q-input:focus { outline: none; border-bottom: 2px solid var(--primary-bg); }
+        
+        .eval-option-row { display: flex; align-items: center; margin-bottom: 8px; gap: 10px; font-size: 14px; }
+        
+        .interactive-trainee-card { cursor: pointer; transition: transform 0.2s, border-color 0.2s; border: 1px solid var(--border-color); }
+        .interactive-trainee-card:hover { transform: translateY(-2px); border-color: var(--primary-bg); background: var(--surface-bg); }
+        
+        .drawer-profile-header { background: linear-gradient(90deg, #1e1b4b 0%, #111827 100%); border-radius: 8px; padding: 20px; border: 1px solid var(--border-color); margin-bottom: 20px; }
+        .pill-accent { background-color: var(--theme-pill-bg); color: var(--theme-pill-text); padding: 4px 10px; border-radius: 9999px; font-size: 12px; font-weight: 500; }
+        .correct-ans-indicator { font-size: 11px; color: var(--success-color); background: rgba(16, 185, 129, 0.15); padding: 2px 6px; border-radius: 4px; margin-left: 10px; font-weight: 600; }
+
+        /* Modernized Form Elements */
+        .form-select, .form-input-text { background: var(--surface-bg); color: #fff; border: 1px solid var(--border-color); padding: 10px 14px; border-radius: 6px; width: 100%; box-sizing: border-box; }
+        .form-select:focus, .form-input-text:focus { outline: none; border-color: var(--primary-bg); }
+
+        /* Modernized Profile UI Settings Scaffolding */
+        .profile-sidebar-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; text-align: center; }
+        .profile-nav-list { list-style: none; margin-top: 20px; padding: 0; }
+        .profile-nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; color: #94a3b8; border-radius: 8px; cursor: pointer; margin-bottom: 4px; font-size: 14px; font-weight: 500; transition: all 0.2s; }
+        .profile-nav-item:hover, .profile-nav-item.active { background: var(--surface-bg); color: #fff; }
+        .profile-pane-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; display: none; }
+        .profile-pane-card.active { display: block; }
+        .settings-row { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--border-color); }
+        .settings-row:last-child { border-bottom: none; }
+        .settings-meta { flex: 1; }
+        .settings-title { font-size: 14px; font-weight: 600; color: #fff; }
+        .settings-desc { font-size: 12px; color: #64748b; margin-top: 2px; }
+
+        /* Grading Console Block Custom CSS */
+        .grading-question-item { background: var(--surface-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+    </style>
+</head>
+<body>
+
+    <div id="loginPage">
+        <div class="login-container">
+            <div class="login-card">
+                <div class="login-header">
+                    <div class="login-logo">SkillUp</div>
+                    <div class="login-subtitle" style="font-size: 20px; font-weight: 700; color: var(--text-light); margin-top: 8px;">Welcome Back</div>
+                    <p style="font-size: 13px; color: #aaa; margin-top: 6px;">Sign in to continue your growth journey</p>
+                </div>
+
+                <div id="loginError" style="display: none; padding: 10px; background: rgba(255,107,107,0.2); border: 1px solid var(--accent-color); border-radius: 6px; color: #ff9999; font-size: 13px; margin-bottom: 15px; text-align: center;">
+                    Invalid credentials.
+                </div>
+
+                <form onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label class="form-label">Work Email</label>
+                        <div style="position: relative;">
+                            <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #888;"><i class="bi bi-envelope"></i></span>
+                            <input type="email" id="loginEmail" class="form-input" placeholder="somebody@example.com" style="padding-left: 38px;" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <div style="position: relative;">
+                            <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #888;"><i class="bi bi-lock"></i></span>
+                            <input type="password" id="loginPassword" class="form-input" placeholder="••••••••" style="padding-left: 38px;" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 10px; padding: 14px; font-size: 15px;">Login</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="mainDashboard" style="display: none;">
+        <div class="container">
+            <aside class="sidebar">
+                <div class="sidebar-header">SkillUp</div>
+                <div style="padding: 0 0 20px 0; border-bottom: 1px solid var(--border-color); margin-bottom: 20px;">
+                    <div id="sidebarUserName" style="font-weight: 600; font-size: 15px;">User Name</div>
+                    <div id="sidebarUserRole" class="badge badge-primary" style="margin-top: 5px; text-transform: uppercase; font-size: 10px;">Role</div>
+                </div>
+                <ul class="nav-menu" id="dynamicNavMenu"></ul>
+            </aside>
+
+            <main class="main-content">
+
+                <section id="dashboard" class="section">
+                    <div class="header">
+                        <h1 class="header-title">Welcome Back, <span class="lbl-display-firstname">User</span>!</h1>
+                    </div>
+
+                    <div class="role-view view-trainee">
+
+    <div class="trainee-hero-card">
+        <div class="trainee-hero-top">
+            <div>
+                <h1 class="trainee-hero-title">
+                    Workforce Skills Overview
+                </h1>
+                <p class="trainee-hero-subtitle" id="heroJobTitle">
+                    Competency Assessment & Training Recommendation System
+                </p>
+            </div>
+        </div>
+
+        <div class="trainee-stats-grid">
+
+            <div class="trainee-stat-card">
+                <div class="stat-icon success">
+                    <i class="bi bi-check-circle-fill"></i>
+                </div>
+                <div class="trainee-stat-number">12</div>
+                <div class="trainee-stat-label">Competencies</div>
+            </div>
+
+            <div class="trainee-stat-card">
+                <div class="stat-icon danger">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                </div>
+                <div class="trainee-stat-number">3</div>
+                <div class="trainee-stat-label">Skill Gaps</div>
+            </div>
+
+            <div class="trainee-stat-card">
+                <div class="stat-icon info">
+                    <i class="bi bi-fire"></i>
+                </div>
+                <div class="trainee-stat-number" id="lblPendingEvalCount">4</div>
+                <div class="trainee-stat-label">In Progress</div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="trainee-section-title">
+        Growth Progress
+    </div>
+
+    <div class="growth-progress-card">
+
+        <div class="growth-progress-header">
+            <div>
+                <div class="growth-progress-label">Overall Proficiency</div>
+                <div class="growth-progress-value">74% of Target</div>
+            </div>
+
+            <div class="growth-progress-trend">
+                Assessment Progress
+            </div>
+        </div>
+
+        <div class="fake-chart">
+            <div class="chart-line"></div>
+
+            <div class="chart-labels">
+                <span>Jan</span>
+                <span>Feb</span>
+                <span>Mar</span>
+                <span>Apr</span>
+                <span>May</span>
+                <span>Jun</span>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="competency-header-row">
+        <h2>Current Competencies</h2>
+        <span>View All</span>
+    </div>
+
+    <div class="competency-list">
+
+        <div class="competency-card" onclick="openCompetencyModal(
+            'UI/UX Design Systems',
+            '85%',
+            'Advanced',
+            'You consistently apply modular UI systems and reusable component structures.',
+            'Design Systems',
+            'Figma, Wireframing, Design Tokens, UX Audits'
+        )">
+
+            <div class="competency-icon">
+                <i class="bi bi-pencil-fill"></i>
+            </div>
+
+            <div class="competency-main">
+                <div class="competency-top">
+                    <div class="competency-title">UI/UX Design Systems</div>
+                    <i class="bi bi-chevron-right"></i>
+                </div>
+
+                <div class="progress-bar competency-progress">
+                    <div class="progress-fill" style="width:85%;"></div>
+                </div>
+
+                <div class="competency-percent">85%</div>
+            </div>
+
+        </div>
+
+        <div class="competency-card" onclick="openCompetencyModal(
+            'Strategic Thinking',
+            '92%',
+            'Expert',
+            'Strong long-term planning and organizational problem-solving capabilities.',
+            'Leadership',
+            'Planning, Decision-Making, Team Strategy'
+        )">
+
+            <div class="competency-icon green">
+                <i class="bi bi-bezier2"></i>
+            </div>
+
+            <div class="competency-main">
+                <div class="competency-top">
+                    <div class="competency-title">Strategic Thinking</div>
+                    <i class="bi bi-chevron-right"></i>
+                </div>
+
+                <div class="progress-bar competency-progress">
+                    <div class="progress-fill green-fill" style="width:92%;"></div>
+                </div>
+
+                <div class="competency-percent">92%</div>
+            </div>
+
+        </div>
+
+        <div class="competency-card" onclick="openCompetencyModal(
+            'Frontend Development',
+            '45%',
+            'Intermediate',
+            'Requires additional training in responsive layouts and state management.',
+            'Development',
+            'HTML, CSS, JavaScript, Responsive UI'
+        )">
+
+            <div class="competency-icon orange">
+                <i class="bi bi-code-slash"></i>
+            </div>
+
+            <div class="competency-main">
+                <div class="competency-top">
+                    <div class="competency-title">Frontend Development</div>
+                    <i class="bi bi-chevron-right"></i>
+                </div>
+
+                <div class="progress-bar competency-progress">
+                    <div class="progress-fill orange-fill" style="width:45%;"></div>
+                </div>
+
+                <div class="competency-percent">45%</div>
+            </div>
+
+        </div>
+
+        <div class="competency-card" onclick="openCompetencyModal(
+            'User Research',
+            '70%',
+            'Advanced',
+            'Able to conduct structured interviews and gather actionable insights.',
+            'Research',
+            'Interviews, Personas, Surveys, User Testing'
+        )">
+
+            <div class="competency-icon gray">
+                <i class="bi bi-person-workspace"></i>
+            </div>
+
+            <div class="competency-main">
+                <div class="competency-top">
+                    <div class="competency-title">User Research</div>
+                    <i class="bi bi-chevron-right"></i>
+                </div>
+
+                <div class="progress-bar competency-progress">
+                    <div class="progress-fill gray-fill" style="width:70%;"></div>
+                </div>
+
+                <div class="competency-percent">70%</div>
+            </div>
+
+        </div>
+
+    </div>
+
+                        <div class="assessment-banner">
+                            <div class="assessment-left">
+                                <div class="assessment-icon">
+                                    <i class="bi bi-clipboard2-pulse-fill"></i>
+                                </div>
+
+                                <div>
+                                    <div class="assessment-title">
+                                        Ready for an assessment?
+                                    </div>
+
+                                    <div class="assessment-subtitle">
+                                        Update your profile to get new training picks.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <i class="bi bi-arrow-right"></i>
+                        </div>
+
+                    </div>
+
+                    <div class="role-view view-trainer" style="display: none;">
+                        <!-- HERO -->
+                        <div class="trainer-hero-card">
+
+                            <div class="trainer-hero-top">
+
+                                <div>
+                                    <h1 class="trainer-hero-title">
+                                        Trainer Operations Dashboard
+                                    </h1>
+
+                                    <p class="trainer-hero-subtitle">
+                                        Monitor employee growth, evaluations, and organizational competency progress.
+                                    </p>
+                                </div>
+
+                                <div class="trainer-hero-badge">
+                                    TRAINER
+                                </div>
+
+                            </div>
+
+                            <!-- STATS -->
+                            <div class="trainer-stats-grid">
+
+                                <div class="trainer-stat-card">
+
+                                    <div class="trainer-stat-icon blue">
+                                        <i class="bi bi-people-fill"></i>
+                                    </div>
+
+                                    <div class="trainer-stat-number">
+                                        48
+                                    </div>
+
+                                    <div class="trainer-stat-label">
+                                        Assigned Trainees
+                                    </div>
+
+                                </div>
+
+                                <div class="trainer-stat-card">
+
+                                    <div class="trainer-stat-icon orange">
+                                        <i class="bi bi-journal-check"></i>
+                                    </div>
+
+                                    <div class="trainer-stat-number">
+                                        14
+                                    </div>
+
+                                    <div class="trainer-stat-label">
+                                        Pending Evaluations
+                                    </div>
+
+                                </div>
+
+                                <div class="trainer-stat-card">
+
+                                    <div class="trainer-stat-icon green">
+                                        <i class="bi bi-bar-chart-line-fill"></i>
+                                    </div>
+
+                                    <div class="trainer-stat-number">
+                                        82%
+                                    </div>
+
+                                    <div class="trainer-stat-label">
+                                        Avg Completion
+                                    </div>
+
+                                </div>
+
+                                <div class="trainer-stat-card">
+
+                                    <div class="trainer-stat-icon red">
+                                        <i class="bi bi-exclamation-diamond-fill"></i>
+                                    </div>
+
+                                    <div class="trainer-stat-number">
+                                        7
+                                    </div>
+
+                                    <div class="trainer-stat-label">
+                                        Skill Gaps
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <!-- SKILL GAP MONITOR -->
+                        <div class="trainer-gap-monitor">
+                            <div class="trainer-gap-top">
+                                <div>
+                                    <h2 class="trainer-gap-title">
+                                        Skills Gap Monitor
+                                    </h2>
+                                    <p class="trainer-gap-subtitle">
+                                        Track workforce competency deficiencies
+                                    </p>
+                                </div>
+                                <button class="trainer-gap-alert-btn">
+                                    <i class="bi bi-bell"></i>
+                                </button>
+                            </div>
+
+                            <div class="trainer-gap-stats">
+                                <div class="trainer-gap-stat">
+                                    <span>Critical Gaps</span>
+                                    <strong id="trainerCriticalGapCount">0</strong>
+                                </div>
+                                <div class="trainer-gap-stat">
+                                    <span>Avg Readiness</span>
+                                    <strong id="trainerReadinessScore">0%</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- FILTERS -->
+
+                        <div class="trainer-gap-filter-row">
+
+                            <button class="trainer-gap-filter active">
+                                All Depts
+                            </button>
+
+                            <button class="trainer-gap-filter">
+                                Engineering
+                            </button>
+
+                            <button class="trainer-gap-filter">
+                                Design
+                            </button>
+
+                            <button class="trainer-gap-filter">
+                                Operations
+                            </button>
+
+                        </div>
+
+                        <!-- GAP DISTRIBUTION -->
+
+                        <div class="trainer-gap-chart-card">
+
+                            <div class="trainer-gap-chart-header">
+
+                                <h3>Gap Distribution</h3>
+
+                                <i class="bi bi-info-circle"></i>
+
+                            </div>
+
+                            <div
+                                class="trainer-gap-chart"
+                                id="trainerGapChart"
+                            ></div>
+
+                        </div>
+
+                        <!-- IDENTIFIED GAPS -->
+
+                        <div class="trainer-gap-section-header">
+
+                            <h2>Identified Gaps</h2>
+
+                            <span>View All</span>
+
+                        </div>
+
+                        <div
+                            class="trainer-gap-list"
+                            id="trainerGapList"
+                        ></div>
+                    </div>
+                    <!-- /.role-view.view-trainer -->
+
+                    <div class="role-view view-admin" style="display: none;">
+
+                        <!-- HERO -->
+                        <div class="admin-hero-card">
+
+                            <div class="admin-hero-top">
+
+                                <div>
+
+                                    <h1 class="admin-hero-title">
+                                        Organization Intelligence Dashboard
+                                    </h1>
+
+                                    <p class="admin-hero-subtitle">
+                                        Monitor workforce competency readiness, platform operations, and enterprise learning performance.
+                                    </p>
+
+                                </div>
+
+                                <div class="admin-hero-badge">
+                                    ADMINISTRATOR
+                                </div>
+
+                            </div>
+
+                            <!-- STATS -->
+                            <div class="admin-stats-grid">
+
+                                <div class="admin-stat-card">
+
+                                    <div class="admin-stat-icon blue">
+                                        <i class="bi bi-people-fill"></i>
+                                    </div>
+
+                                    <div class="admin-stat-number" id="adminTotalUsers">
+                                        124
+                                    </div>
+
+                                    <div class="admin-stat-label">
+                                        Total Workforce Users
+                                    </div>
+
+                                </div>
+
+                                <div class="admin-stat-card">
+
+                                    <div class="admin-stat-icon green">
+                                        <i class="bi bi-mortarboard-fill"></i>
+                                    </div>
+
+                                    <div class="admin-stat-number">
+                                        78%
+                                    </div>
+
+                                    <div class="admin-stat-label">
+                                        Training Completion
+                                    </div>
+
+                                </div>
+
+                                <div class="admin-stat-card">
+
+                                    <div class="admin-stat-icon orange">
+                                        <i class="bi bi-exclamation-triangle-fill"></i>
+                                    </div>
+
+                                    <div class="admin-stat-number">
+                                        19
+                                    </div>
+
+                                    <div class="admin-stat-label">
+                                        Critical Skill Gaps
+                                    </div>
+
+                                </div>
+
+                                <div class="admin-stat-card">
+
+                                    <div class="admin-stat-icon red">
+                                        <i class="bi bi-journal-check"></i>
+                                    </div>
+
+                                    <div class="admin-stat-number">
+                                        42
+                                    </div>
+
+                                    <div class="admin-stat-label">
+                                        Active Evaluations
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <!-- ORGANIZATION OVERVIEW -->
+
+                        <div class="admin-overview-grid">
+
+                            <!-- READINESS -->
+                            <div class="admin-overview-card">
+
+                                <div class="admin-overview-header">
+
+                                    <div>
+                                        <h2 class="admin-overview-title">
+                                            Organizational Readiness
+                                        </h2>
+
+                                        <p class="admin-overview-subtitle">
+                                            Workforce competency alignment
+                                        </p>
+                                    </div>
+
+                                    <i class="bi bi-bar-chart-line-fill"></i>
+
+                                </div>
+
+                                <div class="admin-readiness-score">
+                                    82%
+                                </div>
+
+                                <div class="progress-bar admin-progress">
+                                    <div
+                                        class="progress-fill"
+                                        style="width:82%;"
+                                    ></div>
+                                </div>
+
+                                <div class="admin-readiness-meta">
+                                    Enterprise competency coverage across all departments.
+                                </div>
+
+                            </div>
+
+                            <!-- GAP CATEGORIES -->
+                            <div class="admin-overview-card">
+
+                                <div class="admin-overview-header">
+
+                                    <div>
+                                        <h2 class="admin-overview-title">
+                                            Top Gap Categories
+                                        </h2>
+
+                                        <p class="admin-overview-subtitle">
+                                            Most affected competencies
+                                        </p>
+                                    </div>
+
+                                    <i class="bi bi-diagram-3-fill"></i>
+
+                                </div>
+
+                                <div class="admin-gap-list">
+
+                                    <div class="admin-gap-item">
+                                        <span>Cloud Infrastructure</span>
+                                        <strong>32%</strong>
+                                    </div>
+
+                                    <div class="admin-gap-item">
+                                        <span>Frontend Engineering</span>
+                                        <strong>24%</strong>
+                                    </div>
+
+                                    <div class="admin-gap-item">
+                                        <span>Security & IAM</span>
+                                        <strong>18%</strong>
+                                    </div>
+
+                                    <div class="admin-gap-item">
+                                        <span>Leadership</span>
+                                        <strong>12%</strong>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <!-- QUICK ACTIONS -->
+
+                        <div class="admin-section-header">
+
+                            <h2>
+                                Administrative Actions
+                            </h2>
+
+                        </div>
+
+                        <div class="admin-action-grid">
+
+                            <div class="admin-action-card">
+
+                                <div class="admin-action-icon">
+                                    <i class="bi bi-person-plus-fill"></i>
+                                </div>
+
+                                <div class="admin-action-title">
+                                    Add Workforce User
+                                </div>
+
+                                <div class="admin-action-desc">
+                                    Create and provision employee or trainer accounts.
+                                </div>
+
+                                <button class="btn btn-primary w-100 mt-20">
+                                    Create User
+                                </button>
+
+                            </div>
+
+                            <div class="admin-action-card">
+
+                                <div class="admin-action-icon">
+                                    <i class="bi bi-grid-1x2-fill"></i>
+                                </div>
+
+                                <div class="admin-action-title">
+                                    Create Competency
+                                </div>
+
+                                <div class="admin-action-desc">
+                                    Add competency standards and proficiency requirements.
+                                </div>
+
+                                <button class="btn btn-primary w-100 mt-20">
+                                    Create Competency
+                                </button>
+
+                            </div>
+
+                            <div class="admin-action-card">
+
+                                <div class="admin-action-icon">
+                                    <i class="bi bi-journal-richtext"></i>
+                                </div>
+
+                                <div class="admin-action-title">
+                                    Create Training Module
+                                </div>
+
+                                <div class="admin-action-desc">
+                                    Publish organizational learning programs.
+                                </div>
+
+                                <button class="btn btn-primary w-100 mt-20">
+                                    Create Module
+                                </button>
+
+                            </div>
+
+                            <div class="admin-action-card">
+
+                                <div class="admin-action-icon">
+                                    <i class="bi bi-clipboard-data-fill"></i>
+                                </div>
+
+                                <div class="admin-action-title">
+                                    Launch Evaluation
+                                </div>
+
+                                <div class="admin-action-desc">
+                                    Deploy competency evaluations organization-wide.
+                                </div>
+
+                                <button class="btn btn-primary w-100 mt-20">
+                                    Launch Evaluation
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                        <!-- RECENT ACTIVITY -->
+
+                        <div class="admin-section-header">
+
+                            <h2>
+                                Recent Administrative Activity
+                            </h2>
+
+                        </div>
+
+                        <div class="admin-activity-list">
+
+                            <div class="admin-activity-card">
+
+                                <div class="admin-activity-icon success">
+                                    <i class="bi bi-person-check-fill"></i>
+                                </div>
+
+                                <div class="admin-activity-content">
+
+                                    <div class="admin-activity-title">
+                                        New workforce user provisioned
+                                    </div>
+
+                                    <div class="admin-activity-meta">
+                                        Clyde Mendoza added as Frontend Developer Trainee
+                                    </div>
+
+                                </div>
+
+                                <div class="admin-activity-time">
+                                    2m ago
+                                </div>
+
+                            </div>
+
+                            <div class="admin-activity-card">
+
+                                <div class="admin-activity-icon warning">
+                                    <i class="bi bi-exclamation-triangle-fill"></i>
+                                </div>
+
+                                <div class="admin-activity-content">
+
+                                    <div class="admin-activity-title">
+                                        Critical competency gap detected
+                                    </div>
+
+                                    <div class="admin-activity-meta">
+                                        Cloud Security readiness dropped below threshold
+                                    </div>
+
+                                </div>
+
+                                <div class="admin-activity-time">
+                                    18m ago
+                                </div>
+
+                            </div>
+
+                            <div class="admin-activity-card">
+
+                                <div class="admin-activity-icon blue">
+                                    <i class="bi bi-journal-bookmark-fill"></i>
+                                </div>
+
+                                <div class="admin-activity-content">
+
+                                    <div class="admin-activity-title">
+                                        New training module published
+                                    </div>
+
+                                    <div class="admin-activity-meta">
+                                        Kubernetes Infrastructure Essentials
+                                    </div>
+
+                                </div>
+
+                                <div class="admin-activity-time">
+                                    1h ago
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- /.role-view.view-admin -->
+
+                </section>
+
+                <section id="learning-progress" class="section" style="display: none;">
+
+                    <div class="header">
+                        <h1 class="header-title">Learning Progress</h1>
+                    </div>
+
+                    <!-- HERO -->
+                    <div class="learning-hero-card">
+
+                        <div class="learning-hero-top">
+                            <div>
+                                <h2 class="learning-hero-title">
+                                    Learning Progress
+                                </h2>
+
+                                <p class="learning-hero-subtitle">
+                                    Continue improving your active competencies and certifications.
+                                </p>
+                            </div>
+
+                            <div class="learning-hero-icon">
+                                <i class="bi bi-fire"></i>
+                            </div>
+                        </div>
+
+                        <div class="learning-stats-grid">
+
+                            <div class="learning-mini-stat">
+                                <span>Completed</span>
+                                <strong>12 Units</strong>
+                            </div>
+
+                            <div class="learning-mini-stat">
+                                <span>Hours Learnt</span>
+                                <strong>42.5h</strong>
+                            </div>
+
+                        </div>
+
+                        <div class="learning-tabs">
+                            <div class="learning-tab active">
+                                Recommended
+                            </div>
+
+                            <div class="learning-tab">
+                                In Progress
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- IN PROGRESS -->
+                    <div class="learning-section-header">
+                        <h2>In Progress</h2>
+                        <span>View All</span>
+                    </div>
+
+                    <div class="learning-course-list">
+                        <div class="learning-course-card">
+                            <div class="learning-course-top">
+                                <div class="learning-course-icon">
+                                    <i class="bi bi-code-slash"></i>
+                                </div>
+
+                                <div class="learning-course-main">
+                                    <div class="learning-course-title">
+                                        Advanced React Patterns
+                                    </div>
+
+                                    <div class="learning-course-provider">
+                                        Frontend Masters
+                                    </div>
+                                </div>
+
+                                <div class="learning-course-percent">
+                                    65%
+                                </div>
+                            </div>
+
+                            <div class="learning-progressbar">
+                                <div class="learning-progressfill" style="width:65%;"></div>
+                            </div>
+
+                            <div class="learning-course-footer">
+                                <span>Next: Higher Order Components</span>
+                                <strong>Continue</strong>
+                            </div>
+                        </div>
+
+                        <div class="learning-course-card">
+                            <div class="learning-course-top">
+                                <div class="learning-course-icon shield">
+                                    <i class="bi bi-shield-lock"></i>
+                                </div>
+
+                                <div class="learning-course-main">
+                                    <div class="learning-course-title">
+                                        System Security & IAM
+                                    </div>
+
+                                    <div class="learning-course-provider">
+                                        AWS Training
+                                    </div>
+                                </div>
+
+                                <div class="learning-course-percent">
+                                    30%
+                                </div>
+                            </div>
+
+                            <div class="learning-progressbar">
+                                <div class="learning-progressfill orange" style="width:30%;"></div>
+                            </div>
+
+                            <div class="learning-course-footer">
+                                <span>Next: Policy Evaluation Logic</span>
+                                <strong>Continue</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MILESTONES -->
+                    <div class="milestone-card">
+
+                        <h2 class="milestone-title">
+                            Upcoming Milestones
+                        </h2>
+
+                        <div class="milestone-timeline">
+
+                            <div class="milestone-item completed">
+                                <div class="milestone-dot"></div>
+
+                                <div class="milestone-content">
+                                    <h3>Complete React Patterns Exam</h3>
+                                    <p>Oct 28, 2023</p>
+                                    <span>Completed</span>
+                                </div>
+                            </div>
+
+                            <div class="milestone-item">
+                                <div class="milestone-dot"></div>
+
+                                <div class="milestone-content">
+                                    <h3>IAM Security Certification</h3>
+                                    <p>Nov 05, 2023</p>
+                                    <span>Completed</span>
+                                </div>
+                            </div>
+
+                            <div class="milestone-item">
+                                <div class="milestone-dot"></div>
+
+                                <div class="milestone-content">
+                                    <h3>Quarterly Skills Review</h3>
+                                    <p>Dec 15, 2023</p>
+                                    <span>Completed</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    </section>
+
+
+                <section id="personal-skills" class="section" style="display: none;">
+                    <div class="header"><h1 class="header-title">Personal Competency Ledger</h1></div>
+                    <div class="card">
+                        <div class="card-title">Verified Proficiencies for <span class="lbl-display-fullname">User</span></div>
+                        <table class="table">
+                            <thead><tr><th>Core Domain Identifier</th><th>Status</th><th>Assessed Score Range</th></tr></thead>
+                            <tbody>
+                                <tr><td>Secure Software Design Architecture</td><td><span class="badge badge-success">Completed Verification</span></td><td>92%</td></tr>
+                                <tr><td>UI/UX Modular Design Systems & Variables</td><td><span class="badge badge-success">Completed Verification</span></td><td>85%</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section id="recommended-training" class="section" style="display: none;">
+                    <div class="header">
+                        <h1 class="header-title">
+                            Recommended Learning
+                        </h1>
+                    </div>
+
+                    <!-- HERO -->
+                    <div class="recommend-hero-card">
+                        <div class="recommend-hero-top">
+                            <div>
+                                <h2 class="recommend-title">
+                                    Recommended Learning
+                                </h2>
+                                <p class="recommend-subtitle">
+                                    Personalized training recommendations based on detected competency gaps.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="recommend-priority-card">
+                            <div class="recommend-priority-icon">
+                                <i class="bi bi-exclamation-triangle"></i>
+                            </div>
+                            <div>
+                                <div class="recommend-priority-label">
+                                    Priority: Cloud Architecture
+                                </div>
+                                <div class="recommend-priority-meta">
+                                    Current: 40% • Target: 80%
+                                </div>
+                            </div>
+                        </div>
+                        <div class="recommend-switch-tabs">
+                            <div class="recommend-switch-tab active">
+                                Recommended
+                            </div>
+                            <div class="recommend-switch-tab">
+                                In Progress
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FILTERS -->
+                    <div class="recommend-filter-row">
+                        <div class="recommend-filter active">
+                            All Recommendations
+                        </div>
+                        <div class="recommend-filter">
+                            Technical
+                        </div>
+                        <div class="recommend-filter">
+                            Leadership
+                        </div>
+                    </div>
+
+                    <!-- HIGH PRIORITY -->
+                    <div class="recommend-section-title">
+                        High Priority Gaps
+                    </div>
+                    <div class="recommend-course-grid">
+                        <div class="recommend-course-card">
+                            <div class="recommend-course-image tech-bg">
+                                <i class="bi bi-cloud"></i>
+                            </div>
+                            <div class="recommend-course-content">
+                                <div class="recommend-course-tag critical">
+                                    Critical Gap
+                                </div>
+                                <div class="recommend-course-title">
+                                    Advanced Cloud Architecture & Patterns
+                                </div>
+                                <div class="recommend-course-meta">
+                                    <span><i class="bi bi-clock"></i> 12h 30m</span>
+                                    <span><i class="bi bi-bar-chart"></i> Advanced</span>
+                                </div>
+                            </div>
+                            <button class="recommend-btn">
+                                Enroll
+                            </button>
+                        </div>
+
+                        <div class="recommend-course-card">
+                            <div class="recommend-course-image security-bg">
+                                <i class="bi bi-shield-lock"></i>
+                            </div>
+                            <div class="recommend-course-content">
+                                <div class="recommend-course-tag secondary">
+                                    Secondary Gap
+                                </div>
+                                <div class="recommend-course-title">
+                                    Data Integrity & Warehouse Security
+                                </div>
+                                <div class="recommend-course-meta">
+                                    <span><i class="bi bi-clock"></i> 8h 45m</span>
+                                    <span><i class="bi bi-bar-chart"></i> Intermediate</span>
+                                </div>
+                            </div>
+                            <button class="recommend-btn">
+                                Enroll
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- CAREER GROWTH -->
+                    <div class="recommend-section-title">
+                        Career Growth
+                    </div>
+                    <div class="recommend-course-grid">
+                        <div class="recommend-course-card">
+                            <div class="recommend-course-image leadership-bg">
+                                <i class="bi bi-briefcase"></i>
+                            </div>
+                            <div class="recommend-course-content">
+                                <div class="recommend-course-tag growth">
+                                    Growth
+                                </div>
+                                <div class="recommend-course-title">
+                                    Strategic Decision Making for Leads
+                                </div>
+                                <div class="recommend-course-meta">
+                                    <span><i class="bi bi-clock"></i> 5h 20m</span>
+                                    <span><i class="bi bi-bar-chart"></i> Intermediate</span>
+                                </div>
+                            </div>
+                            <button class="recommend-btn">
+                                Enroll
+                            </button>
+                        </div>
+
+                        <div class="recommend-course-card">
+                            <div class="recommend-course-image infra-bg">
+                                <i class="bi bi-diagram-3"></i>
+                            </div>
+                            <div class="recommend-course-content">
+                                <div class="recommend-course-tag technical">
+                                    Technical
+                                </div>
+                                <div class="recommend-course-title">
+                                    Microservices Orchestration with K8s
+                                </div>
+                                <div class="recommend-course-meta">
+                                    <span><i class="bi bi-clock"></i> 15h 10m</span>
+                                    <span><i class="bi bi-bar-chart"></i> Advanced</span>
+                                </div>
+                            </div>
+                            <button class="recommend-btn">
+                                Enroll
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="skill-gap-results" class="section" style="display: none;">
+                    <div class="header">
+                        <h1 class="header-title">
+                            Skill Gap Results
+                        </h1>
+                    </div>
+
+                    <!-- HERO -->
+                    <div class="skillgap-hero-card">
+                        <div class="skillgap-stats-grid">
+                            <div class="skillgap-mini-stat">
+                                <span>Total Gaps</span>
+                                <strong>14</strong>
+                            </div>
+                            <div class="skillgap-mini-stat">
+                                <span>Active Training</span>
+                                <strong>82%</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CRITICAL GAP -->
+                    <div class="critical-gap-card">
+                        <div class="critical-gap-content">
+                            <div>
+                                <h2 class="critical-gap-title">
+                                    Critical Skills Gap
+                                </h2>
+                                <p class="critical-gap-desc">
+                                    Cloud Architecture is currently 40% below target for Junior roles.
+                                </p>
+                                <button class="critical-gap-btn">
+                                    Fix Now
+                                </button>
+                            </div>
+
+                            <div class="critical-gap-ring">
+                                <svg viewBox="0 0 120 120">
+                                    <circle
+                                        class="ring-bg"
+                                        cx="60"
+                                        cy="60"
+                                        r="48"
+                                    ></circle>
+                                    <circle
+                                        class="ring-progress"
+                                        cx="60"
+                                        cy="60"
+                                        r="48"
+                                    ></circle>
+                                </svg>
+                                <div class="ring-label">
+                                    40%
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TRACKING -->
+                    <div class="skillgap-header-row">
+                        <h2>
+                            Competency Tracking
+                        </h2>
+                        <button class="skillgap-filter-btn">
+                            <i class="bi bi-sliders"></i>
+                        </button>
+                    </div>
+                    <div class="skillgap-list">
+                        <div class="skillgap-card">
+                            <div class="skillgap-top">
+                                <div>
+                                    <div class="skillgap-title">
+                                        Advanced React Patterns
+                                    </div>
+                                    <div class="skillgap-category">
+                                        Frontend Engineering
+                                    </div>
+                                </div>
+                                <div class="skillgap-gap danger">
+                                    Gap: 74%
+                                </div>
+                            </div>
+                            <div class="skillgap-progress-label">
+                                Mastery Progress
+                            </div>
+                            <div class="skillgap-progressbar">
+                                <div class="skillgap-progressfill" style="width:45%;"></div>
+                            </div>
+                            <div class="skillgap-percent">
+                                45%
+                            </div>
+                        </div>
+                        <div class="skillgap-card">
+                            <div class="skillgap-top">
+                                <div>
+                                    <div class="skillgap-title">
+                                        System Security & IAM
+                                    </div>
+                                    <div class="skillgap-category">
+                                        DevOps
+                                    </div>
+                                </div>
+                                <div class="skillgap-gap success">
+                                    Gap: 18%
+                                </div>
+                            </div>
+                            <div class="skillgap-progress-label">
+                                Mastery Progress
+                            </div>
+                            <div class="skillgap-progressbar">
+                                <div class="skillgap-progressfill" style="width:92%;"></div>
+                            </div>
+                            <div class="skillgap-percent">
+                                92%
+                            </div>
+                        </div>
+                        <div class="skillgap-card">
+                            <div class="skillgap-top">
+                                <div>
+                                    <div class="skillgap-title">
+                                        Distributed Databases
+                                    </div>
+                                    <div class="skillgap-category">
+                                        Backend Engineering
+                                    </div>
+                                </div>
+                                <div class="skillgap-gap warning">
+                                    Gap: 42%
+                                </div>
+                            </div>
+                            <div class="skillgap-progress-label">
+                                Mastery Progress
+                            </div>
+                            <div class="skillgap-progressbar">
+                                <div class="skillgap-progressfill" style="width:65%;"></div>
+                            </div>
+                            <div class="skillgap-percent">
+                                65%
+                            </div>
+                        </div>
+                        <div class="skillgap-card">
+                            <div class="skillgap-top">
+                                <div>
+                                    <div class="skillgap-title">
+                                        Agile Leadership
+                                    </div>
+                                    <div class="skillgap-category">
+                                        Management
+                                    </div>
+                                </div>
+                                <div class="skillgap-gap success">
+                                    Gap: 12%
+                                </div>
+                            </div>
+                            <div class="skillgap-progress-label">
+                                Mastery Progress
+                            </div>
+                            <div class="skillgap-progressbar">
+                                <div class="skillgap-progressfill" style="width:88%;"></div>
+                            </div>
+                            <div class="skillgap-percent">
+                                88%
+                            </div>
+                        </div>
+                        <div class="skillgap-card">
+                            <div class="skillgap-top">
+                                <div>
+                                    <div class="skillgap-title">
+                                        Machine Learning Ops
+                                    </div>
+                                    <div class="skillgap-category">
+                                        Data Science
+                                    </div>
+                                </div>
+                                <div class="skillgap-gap danger">
+                                    Gap: 80%
+                                </div>
+                            </div>
+                            <div class="skillgap-progress-label">
+                                Mastery Progress
+                            </div>
+                            <div class="skillgap-progressbar">
+                                <div class="skillgap-progressfill" style="width:20%;"></div>
+                            </div>
+                            <div class="skillgap-percent">
+                                20%
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="evaluation-management" class="section" style="display:none;">
+                    <div class="header">
+                        <h1 class="header-title">
+                            Evaluation Management
+                        </h1>
+                    </div>
+                    <!-- HERO -->
+                    <div class="evaluation-management-hero">
+
+                        <div class="evaluation-management-top">
+
+                            <div>
+
+                                <h2 class="evaluation-management-title">
+                                    Workforce Evaluation Console
+                                </h2>
+
+                                <p class="evaluation-management-subtitle">
+                                    Create, distribute, monitor, and review organizational appraisals.
+                                </p>
+
+                            </div>
+
+                            <button
+                                class="btn btn-primary"
+                                onclick="openCreateEvaluationModal()"
+                            >
+                                <i class="bi bi-plus-lg"></i>
+                                Create Evaluation
+                            </button>
+
+                        </div>
+
+                        <div class="evaluation-management-stats">
+
+                            <div class="evaluation-management-stat">
+                                <span>Total Sent</span>
+                                <strong>28</strong>
+                            </div>
+
+                            <div class="evaluation-management-stat">
+                                <span>Pending Responses</span>
+                                <strong>14</strong>
+                            </div>
+
+                            <div class="evaluation-management-stat">
+                                <span>Completion Rate</span>
+                                <strong>82%</strong>
+                            </div>
+
+                            <div class="evaluation-management-stat">
+                                <span>Avg Score</span>
+                                <strong>88%</strong>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- TABS -->
+
+                    <div class="evaluation-management-tabs">
+
+                        <button
+                            class="evaluation-management-tab active"
+                            data-eval-tab="sent"
+                        >
+                            Sent
+                        </button>
+
+                        <button
+                            class="evaluation-management-tab"
+                            data-eval-tab="responses"
+                        >
+                            Responses
+                        </button>
+
+                        <button
+                            class="evaluation-management-tab"
+                            data-eval-tab="analytics"
+                        >
+                            Analytics
+                        </button>
+
+                    </div>
+
+                    <!-- FILTERS -->
+
+                    <div class="evaluation-filter-row">
+
+                        <select class="evaluation-filter-select">
+                            <option>By Training Course</option>
+                            <option>Cloud Architecture</option>
+                            <option>Frontend Engineering</option>
+                            <option>Leadership</option>
+                        </select>
+
+                        <select class="evaluation-filter-select">
+                            <option>All Status</option>
+                            <option>Pending</option>
+                            <option>Completed</option>
+                        </select>
+
+                        <select class="evaluation-filter-select">
+                            <option>Newest First</option>
+                            <option>Oldest First</option>
+                        </select>
+
+                    </div>
+
+                    <!-- SENT EVALUATIONS -->
+
+                    <div class="evaluation-management-list">
+
+                        <div class="trainer-appraisal-card">
+
+                            <div class="trainer-appraisal-top">
+
+                                <div>
+
+                                    <div class="evaluation-course-pill">
+                                        Frontend Engineering
+                                    </div>
+
+                                    <h2 class="trainer-appraisal-title">
+                                        PHP Full-Stack Development Evaluation Exam
+                                    </h2>
+
+                                    <p class="trainer-appraisal-desc">
+                                        Appraise full-stack engineering implementation competencies.
+                                    </p>
+
+                                </div>
+
+                                <div class="evaluation-status-pill pending">
+                                    Pending
+                                </div>
+
+                            </div>
+
+                            <div class="trainer-appraisal-progress-wrap">
+
+                                <div class="trainer-appraisal-progress-labels">
+
+                                    <span>Completion Rate</span>
+
+                                    <strong>65%</strong>
+
+                                </div>
+
+                                <div class="progress-bar">
+                                    <div
+                                        class="progress-fill"
+                                        style="width:65%;"
+                                    ></div>
+                                </div>
+
+                            </div>
+
+                            <div class="trainer-appraisal-footer">
+
+                                <div class="trainer-appraisal-meta-group">
+
+                                    <div class="trainer-appraisal-meta-item">
+                                        <i class="bi bi-people"></i>
+                                        24 Assigned
+                                    </div>
+
+                                    <div class="trainer-appraisal-meta-item">
+                                        <i class="bi bi-check-circle"></i>
+                                        15 Submitted
+                                    </div>
+
+                                </div>
+
+                                <button class="btn btn-secondary">
+                                    Review Responses
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                        <div class="trainer-appraisal-card">
+
+                            <div class="trainer-appraisal-top">
+
+                                <div>
+
+                                    <div class="evaluation-course-pill">
+                                        Cloud Infrastructure
+                                    </div>
+
+                                    <h2 class="trainer-appraisal-title">
+                                        AWS IAM Security Assessment
+                                    </h2>
+
+                                    <p class="trainer-appraisal-desc">
+                                        Security policy evaluation and cloud IAM competency validation.
+                                    </p>
+
+                                </div>
+
+                                <div class="evaluation-status-pill completed">
+                                    Completed
+                                </div>
+
+                            </div>
+
+                            <div class="trainer-appraisal-progress-wrap">
+
+                                <div class="trainer-appraisal-progress-labels">
+
+                                    <span>Completion Rate</span>
+
+                                    <strong>92%</strong>
+
+                                </div>
+
+                                <div class="progress-bar">
+                                    <div
+                                        class="progress-fill green-fill"
+                                        style="width:92%;"
+                                    ></div>
+                                </div>
+
+                            </div>
+
+                            <div class="trainer-appraisal-footer">
+
+                                <div class="trainer-appraisal-meta-group">
+
+                                    <div class="trainer-appraisal-meta-item">
+                                        <i class="bi bi-people"></i>
+                                        18 Assigned
+                                    </div>
+
+                                    <div class="trainer-appraisal-meta-item">
+                                        <i class="bi bi-check-circle"></i>
+                                        18 Submitted
+                                    </div>
+
+                                </div>
+
+                                <button class="btn btn-secondary">
+                                    View Analytics
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+                <section id="answer-evaluations" class="section" style="display: none;">
+                    <div class="header">
+                        <h1 class="header-title">
+                            Evaluations
+                        </h1>
+                    </div>
+
+                    <!-- FILTERS -->
+                    <div class="evaluation-filter-row">
+
+                        <select class="evaluation-filter-select">
+                            <option>By Training Course</option>
+                            <option>Cloud Architecture</option>
+                            <option>Frontend Engineering</option>
+                            <option>Leadership</option>
+                        </select>
+
+                        <select class="evaluation-filter-select">
+                            <option>All Status</option>
+                            <option>Finished</option>
+                            <option>Unfinished</option>
+                        </select>
+
+                        <select class="evaluation-filter-select">
+                            <option>Due Date</option>
+                            <option>Nearest Deadline</option>
+                            <option>Latest Deadline</option>
+                        </select>
+
+                    </div>
+
+                    <!-- EVALUATION CARDS -->
+                    <div class="evaluation-card-list">
+
+                        <!-- CARD -->
+                        <div class="evaluation-card pending">
+
+                            <div class="evaluation-card-top">
+
+                                <div>
+
+                                    <div class="evaluation-course-pill">
+                                        Frontend Engineering
+                                    </div>
+
+                                    <h2 class="evaluation-card-title">
+                                        PHP Full-Stack Development Evaluation Exam
+                                    </h2>
+
+                                    <p class="evaluation-card-desc">
+                                        Appraise core functional performance parameters for framework implementations.
+                                    </p>
+
+                                </div>
+
+                                <div class="evaluation-status-wrap">
+
+                                    <div class="evaluation-status-pill pending">
+                                        Pending
+                                    </div>
+
+                                    <div class="evaluation-due-date">
+                                        Due Oct 28 • 5:00 PM
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="evaluation-progress-wrap">
+
+                                <div class="evaluation-progress-labels">
+                                    <span>Completion Progress</span>
+                                    <strong>65%</strong>
+                                </div>
+
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width:65%;"></div>
+                                </div>
+
+                            </div>
+
+                            <div class="evaluation-card-footer">
+
+                                <div class="evaluation-meta-group">
+
+                                    <div class="evaluation-meta-item">
+                                        <i class="bi bi-clock"></i>
+                                        45 Minutes
+                                    </div>
+
+                                    <div class="evaluation-meta-item">
+                                        <i class="bi bi-ui-checks-grid"></i>
+                                        24 Questions
+                                    </div>
+
+                                </div>
+
+                                <button class="btn btn-primary">
+                                    Continue Evaluation
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                        <!-- COMPLETED -->
+                        <div class="evaluation-card completed">
+
+                            <div class="evaluation-card-top">
+
+                                <div>
+
+                                    <div class="evaluation-course-pill">
+                                        Cloud Infrastructure
+                                    </div>
+
+                                    <h2 class="evaluation-card-title">
+                                        AWS IAM Security Assessment
+                                    </h2>
+
+                                    <p class="evaluation-card-desc">
+                                        Security policy evaluation and cloud identity competency validation.
+                                    </p>
+
+                                </div>
+
+                                <div class="evaluation-status-wrap">
+
+                                    <div class="evaluation-status-pill completed">
+                                        Completed
+                                    </div>
+
+                                    <div class="evaluation-due-date">
+                                        Submitted Oct 21
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="evaluation-progress-wrap">
+
+                                <div class="evaluation-progress-labels">
+                                    <span>Final Score</span>
+                                    <strong>92%</strong>
+                                </div>
+
+                                <div class="progress-bar">
+                                    <div class="progress-fill green-fill" style="width:92%;"></div>
+                                </div>
+
+                            </div>
+
+                            <div class="evaluation-card-footer">
+
+                                <div class="evaluation-meta-group">
+
+                                    <div class="evaluation-meta-item">
+                                        <i class="bi bi-award"></i>
+                                        Passed
+                                    </div>
+
+                                    <div class="evaluation-meta-item">
+                                        <i class="bi bi-check-circle"></i>
+                                        Verified
+                                    </div>
+
+                                </div>
+
+                                <button class="btn btn-secondary">
+                                    View Results
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                </section>
+
+                <section id="employee-tracker" class="section" style="display: none;">
+                    <div class="header"><h1 class="header-title">Workforce Training Milestone Trackers</h1></div>
+                    <div class="grid-2">
+                        <div>
+                            <div class="card">
+                                <div class="card-title">Operational Active Directory Workers</div>
+                                <p class="text-muted mb-20" style="font-size: 13px;">Select an individual record card row cell to render verified competency data insights.</p>
+                                <div id="trackerTraineeCardsTargetList"></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div id="emptyDrawerFallbackNotice" class="card" style="text-align: center; padding: 40px 20px; border: 2px dashed var(--border-color);">
+                                <i class="bi bi-person-bounding-box" style="font-size: 40px; color: #4b5563;"></i>
+                                <h3 style="margin-top: 15px; font-size: 16px;">No Trainee Record Target Active</h3>
+                                <p style="color: #6b7280; font-size: 13px; margin-top: 5px;">Select an active profile to build an immutable data drawer analysis matrix canvas.</p>
+                            </div>
+
+                            <div id="traineeHighFidelityDrawerCard" style="display: none;">
+                                <div class="drawer-profile-header">
+                                    <div class="flex justify-between align-center">
+                                        <h2 id="drawerTraineeName" style="margin: 0; font-size: 20px; font-weight: 700; color: #fff;">User Record</h2>
+                                        <span id="drawerTraineeBadge" class="pill-accent">Trainee Profile</span>
+                                    </div>
+                                    <p id="drawerTraineeEmail" style="margin: 6px 0 0 0; color: #94a3b8; font-size: 13px; font-family: monospace;"></p>
+                                </div>
+
+                                <div class="card">
+                                    <div class="card-title" style="font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; color: #94a3b8;">Assigned Active Learning Track</div>
+                                    <div id="drawerTraineeTrack" style="font-weight: 600; font-size: 15px; margin-top: 5px; color: #f1f5f9;">Not Linked</div>
+                                </div>
+
+                                <div class="card">
+                                    <div class="card-title" style="font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; color: #94a3b8;">Competency Distribution Metrics</div>
+                                    <div class="flex justify-between align-center mt-10">
+                                        <span style="font-size: 13px; color: #94a3b8;">Program Course Completion Benchmark Metrics:</span>
+                                        <strong id="drawerTraineeProgressPct" style="color: var(--success-color);">0%</strong>
+                                    </div>
+                                    <div class="progress-bar mt-10"><div id="drawerTraineeProgressBarFill" class="progress-fill" style="width: 0%;"></div></div>
+                                </div>
+
+                                <div class="card">
+                                    <div class="card-title" style="font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; color: #94a3b8;">Evaluations Matrix Activity History</div>
+                                    <div id="drawerTraineeHistoryLog" style="margin-top: 10px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="skills-gap-monitor" class="section" style="display: none;">
+                    <div class="header">
+                        <h1 class="header-title">
+                            Skills Gap Monitor
+                        </h1>
+                    </div>
+
+                    <!-- HERO -->
+                    <div class="trainer-gap-monitor">
+                        <div class="trainer-gap-top">
+                            <div>
+                                <h2 class="trainer-gap-title">
+                                    Skills Gap Monitor
+                                </h2>
+                                <p class="trainer-gap-subtitle">
+                                    Track workforce competency deficiencies
+                                </p>
+                            </div>
+                            <button class="trainer-gap-alert-btn">
+                                <i class="bi bi-bell"></i>
+                            </button>
+                        </div>
+
+                        <div class="trainer-gap-stats">
+                            <div class="trainer-gap-stat">
+                                <span>Critical Gaps</span>
+                                <strong id="trainerCriticalGapCount">0</strong>
+                            </div>
+                            <div class="trainer-gap-stat">
+                                <span>Avg Readiness</span>
+                                <strong id="trainerReadinessScore">0%</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FILTERS -->
+                    <div class="trainer-gap-filter-row">
+                        <button class="trainer-gap-filter active">
+                            All Depts
+                        </button>
+                        <button class="trainer-gap-filter">
+                            Engineering
+                        </button>
+                        <button class="trainer-gap-filter">
+                            Design
+                        </button>
+                        <button class="trainer-gap-filter">
+                            Operations
+                        </button>
+                    </div>
+
+                    <!-- CHART -->
+                    <div class="trainer-gap-chart-card">
+                        <div class="trainer-gap-chart-header">
+                            <h3>
+                                Gap Distribution
+                            </h3>
+                            <i class="bi bi-info-circle"></i>
+                        </div>
+                        <div
+                            class="trainer-gap-chart"
+                            id="trainerGapChart"
+                        ></div>
+                    </div>
+
+                    <!-- IDENTIFIED GAPS -->
+                    <div class="trainer-gap-section-header">
+                        <h2>
+                            Identified Gaps
+                        </h2>
+                        <span>
+                            View All
+                        </span>
+                    </div>
+                    <div
+                        class="trainer-gap-list"
+                        id="trainerGapList"
+                    ></div>
+                </section>
+
+                <section id="trainer-management-hub" class="section" style="display:none;">
+                    <div class="header"><h1 class="header-title">Management Hub</h1></div>
+                    
+                    <div class="flex gap-10 mb-20" style="border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+                        <button class="btn btn-primary" id="btnTabShowBuilder" onclick="switchTrainerHubViewMode('builder')"><i class="bi bi-pencil-square"></i> Google Forms Canvas</button>
+                        <button class="btn btn-secondary" id="btnTabShowTracker" onclick="switchTrainerHubViewMode('tracker')"><i class="bi bi-folder-check"></i> Sent Appraisals Tracker</button>
+                    </div>
+
+                    <div id="trainerHubBuilderSubpane">
+                        <div class="gform-canvas">
+                            <form id="frmGoogleFormsBuilder" onsubmit="commitGoogleFormTemplate(event)">
+                                <div class="gform-header-card">
+                                    <input type="text" id="gformTitle" class="gform-input-title" value="Untitled Evaluation Form" required>
+                                    <input type="text" id="gformDesc" class="gform-input-desc" value="Please fill out this evaluation form completely to update framework competency benchmarks.">
+                                    
+                                    <div class="form-group" style="margin-top: 20px;">
+                                        <label class="form-label" style="color: var(--theme-pill-text); font-weight: 600;"><i class="bi bi-diagram-3-fill"></i> Restrict Distribution Scope to Enrolled Learning Track</label>
+                                        <select id="gformTargetCourseRestriction" class="form-select" style="margin-top: 5px;">
+                                            <option value="All Tracks">Broadcast Deployment (All Registered Users Access Path)</option>
+                                            <option value="Full-Stack Engineering Framework Track">Full-Stack Engineering Framework Track Only</option>
+                                            <option value="Data Security Compliance & Policy Directory">Data Security Compliance & Policy Directory Only</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group" style="margin-top: 20px;">
+                                        <label class="form-label" style="color: var(--theme-pill-text); font-weight: 600;">
+                                        <i class="bi bi-calendar-event"></i> Evaluation Due Date
+                                        </label>
+                                        <input type="datetime-local" class="form-input" id="evaluationDueDate" style="margin-top: 5px;">
+                                    </div>
+
+                                </div>
+
+                                <div id="gformQuestionsSandbox"></div>
+
+                                <div style="display: flex; justify-content: space-between; margin-top: 20px; margin-bottom: 40px;">
+                                    <button type="button" class="btn btn-secondary" onclick="appendGoogleFormQuestionBlock()"><i class="bi bi-plus-lg"></i> Add Question Block</button>
+                                    <button type="submit" class="btn btn-primary"><i class="bi bi-send-fill"></i> Publish & Distribute Evaluation</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div id="trainerHubTrackerSubpane" style="display: none;">
+                        <div id="trainerTrackerGlobalListView">
+                            <div class="card">
+                                <div class="card-title">Distributed Corporate Performance Appraisal Tracker Registry</div>
+                                <div id="trainerDistributedFormsTrackerContainer"></div>
+                            </div>
+                        </div>
+
+                        <div id="trainerLiveGradingWorkspaceConsole" style="display: none; margin-top: 15px;">
+                            <button type="button" class="btn btn-secondary mb-20" onclick="exitGradingConsoleWorkspace()"><i class="bi bi-arrow-left"></i> Exit Grading Matrix</button>
+                            <div class="card">
+                                <div class="flex justify-between align-center" style="border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 15px;">
+                                    <div>
+                                        <h2 id="gradeConsoleFormTitle" style="margin: 0; color:#fff;">Grading Workspace</h2>
+                                        <p id="gradeConsoleSubMeta" style="margin: 4px 0 0 0; color:#aaa; font-size: 13px;"></p>
+                                    </div>
+                                    <div class="badge badge-warning" id="gradeConsoleRunningScoreLabel" style="font-size:14px; padding: 8px 12px;">Score: --</div>
+                                </div>
+                                
+                                <form id="frmTrainerPointAwardingSubmission" onsubmit="commitAssignedPointsGradingAudit(event)">
+                                    <div id="trainerGradingQuestionsRenderCanvas"></div>
+                                    <div style="text-align: right; margin-top: 15px;">
+                                        <button type="submit" class="btn btn-success"><i class="bi bi-bookmark-check-fill"></i> Save Point Grades & Update Portfolio Index</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                
+
+<section id="user-accounts" class="section" style="display: none;">
+                    <div class="header">
+                        <h1 class="header-title">Account Provisioning & Identity Directory</h1>
+                    </div>
+                    
+                    <div class="grid-2 mb-20">
+                        <div class="card">
+                            <div class="card-title"><i class="bi bi-person-plus-fill"></i> Provision New User Profile Node</div>
+                            <form id="frmAdminCreateUserAccount" onsubmit="executeAdminAccountProvisioning(event)">
+                                <div class="form-group">
+                                    <label class="form-label">First Name</label>
+                                    <input type="text" id="adminNewUserFirst" class="form-input-text" placeholder="John" required>
+                                </div>
+                                <div class="form-group mt-10">
+                                    <label class="form-label">Last Name</label>
+                                    <input type="text" id="adminNewUserLast" class="form-input-text" placeholder="Doe" required>
+                                </div>
+                                <div class="form-group mt-10">
+                                    <label class="form-label">Corporate Email Address</label>
+                                    <input type="email" id="adminNewUserEmail" class="form-input-text" placeholder="j.doe@email.com" required>
+                                </div>
+                                <div class="form-group mt-10">
+                                    <label class="form-label">Job Assignment Role / Designation</label>
+                                    <input type="text" id="adminNewUserJobTitle" class="form-input-text" placeholder="Senior Security Associate" required>
+                                </div>
+                                <div class="form-group mt-10">
+                                    <label class="form-label">System Access Authorization Security Role</label>
+                                    <select id="adminNewUserSysRole" class="form-select">
+                                        <option value="trainee">Trainee Profile Node</option>
+                                        <option value="trainer">Trainer Management Tier</option>
+                                        <option value="admin">System Administration Tier</option>
+                                    </select>
+                                </div>
+                                <div class="form-group mt-10">
+                                    <label class="form-label">Assigned Learning Path Track</label>
+                                    <select id="adminNewUserTrack" class="form-select">
+                                        <option value="Full-Stack Engineering Framework Track">Full-Stack Engineering Framework Track</option>
+                                        <option value="Data Security Compliance & Policy Directory">Data Security Compliance & Policy Directory</option>
+                                        <option value="All Management Matrices Standard">All Management Matrices Standard</option>
+                                    </select>
+                                </div>
+                                <div class="form-group mt-10">
+                                    <label class="form-label">Initial Access Credential Password Key</label>
+                                    <input type="text" id="adminNewUserPass" class="form-input-text" value="TemporaryPass123!" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100 mt-20"><i class="bi bi-shield-check"></i> Commit Account Node to Directory</button>
+                            </form>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-title"><i class="bi bi-shield-lock-fill"></i> Credentials & Active Directory Override Ledger</div>
+                            <p class="text-muted mb-20" style="font-size:13px;">Forced overrides of security states and credential values.</p>
+                            
+                            <div style="max-height: 500px; overflow-y: auto;" id="adminActiveUsersPasswordResetOverrideContainer"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="competency-framework" class="section" style="display: none;">
+                    <div class="header">
+                        <h1 class="header-title">Competency Framework Standard Settings</h1>
+                    </div>
+                    <div class="grid-2 mb-20">
+                        <div class="card">
+                            <div class="card-title">Framework Governance Summary</div>
+                            <p class="text-muted" style="font-size:13px;">Control competency taxonomy, proficiency level definitions, and evaluation rules used by the enterprise standard framework.</p>
+                            <div class="settings-overview-grid">
+                                <div class="overview-stat"><strong>Competency Domains</strong><span id="cfDomainCount">0</span></div>
+                                <div class="overview-stat"><strong>Proficiency Levels</strong><span id="cfLevelCount">0</span></div>
+                                <div class="overview-stat"><strong>Baseline Rules</strong><span id="cfRuleCount">0</span></div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-title">Active Standard Controls</div>
+                            <div class="settings-row">
+                                <div class="settings-meta"><div class="settings-title">Enable Framework Governance</div><div class="settings-desc">Activate competency standards for all training tracks and evaluations.</div></div>
+                                <label class="switch"><input type="checkbox" id="cfGovernanceEnabled" onchange="saveCompetencyFrameworkConfig()"><span class="slider"></span></label>
+                            </div>
+                            <div class="settings-row">
+                                <div class="settings-meta"><div class="settings-title">Review Cycle</div><div class="settings-desc">Framework updates are automatically aligned to quarterly review cadence.</div></div>
+                                <span class="badge badge-success">Quarterly</span>
+                            </div>
+                            <div class="settings-row">
+                                <div class="settings-meta"><div class="settings-title">Standard Compliance Mode</div><div class="settings-desc">Lock competency requirements to enterprise baseline taxonomy.</div></div>
+                                <span class="badge badge-primary">Enforced</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">Competency Domains & Proficiency Matrix</div>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Domain</th>
+                                    <th>Description</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cfDomainsTableBody"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">Proficiency Level Definitions</div>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Level</th>
+                                    <th>Score Range</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cfLevelsTableBody"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">Baseline Taxonomy Rule Editor</div>
+                        <div id="cfRulesList"></div>
+                        <form id="cfDomainForm" onsubmit="addCompetencyFrameworkDomain(event)">
+                            <div class="form-inline-grid" style="margin-top:20px;">
+                                <div>
+                                    <label class="form-label">New Competency Domain</label>
+                                    <input type="text" id="cfNewDomainName" class="form-input" placeholder="e.g. Cybersecurity Resilience" required>
+                                </div>
+                                <div>
+                                    <label class="form-label">Domain Description</label>
+                                    <input type="text" id="cfNewDomainDescription" class="form-input" placeholder="e.g. Resilient architecture, secure operations, and risk mitigation." required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100 mt-20">Add Competency Domain</button>
+                        </form>
+                        <button type="button" class="btn btn-secondary w-100 mt-15" onclick="saveCompetencyFrameworkConfig()">Save Competency Framework Settings</button>
+                    </div>
+                </section>
+                <section id="training-catalog" class="section" style="display: none;">
+                    <div class="header">
+                        <h1 class="header-title">Training Catalog Matrix Router</h1>
+                    </div>
+                    <div class="grid-2 mb-20">
+                        <div class="card">
+                            <div class="card-title">Catalog Health Metrics</div>
+                            <div class="settings-overview-grid">
+                                <div class="overview-stat"><strong>Total Programs</strong><span id="tcTotalPrograms">0</span></div>
+                                <div class="overview-stat"><strong>Tracks Covered</strong><span id="tcTrackCount">0</span></div>
+                                <div class="overview-stat"><strong>Active Courses</strong><span id="tcActiveCourses">0</span></div>
+                            </div>
+                            <div class="form-group mt-20">
+                                <label class="form-label">Filter by Track</label>
+                                <select id="tcTrackFilter" class="form-select" onchange="renderTrainingCatalogTable(); renderTrainingCatalogList();">
+                                    <option value="All Tracks">All Tracks</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Catalog Router Status</label>
+                                <div class="settings-row" style="padding: 12px 0; border-bottom: none;">
+                                    <div class="settings-meta"><div class="settings-title">Production Router</div><div class="settings-desc">Training catalog routes active programs to evaluation and enrollment workflows.</div></div>
+                                    <span class="badge badge-success">Online</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-title">Catalog Administration</div>
+                            <p class="text-muted" style="font-size:13px;">Manage active training programs and control the enterprise learning registry directly from the matrix router.</p>
+                            <div class="settings-row">
+                                <div class="settings-meta"><div class="settings-title">Default Training Scope</div><div class="settings-desc">Programs are mapped into tracks and competency domains for automatic recommendation.</div></div>
+                                <span class="badge badge-primary">Enterprise</span>
+                            </div>
+                            <button class="btn btn-primary w-100 mt-20" onclick="saveTrainingCatalogItems(); alert('Training catalog router refreshed.')">Refresh Catalog Router</button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">Training Program Matrix</div>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Program</th>
+                                    <th>Track</th>
+                                    <th>Domain</th>
+                                    <th>Hours</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tcCatalogTableBody"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">Active Training Program Feed</div>
+                        <div id="tcCatalogList"></div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">Add New Training Program</div>
+                        <form id="tcAddCourseForm" onsubmit="addTrainingCatalogItem(event)">
+                            <div class="form-inline-grid">
+                                <div class="form-group">
+                                    <label class="form-label">Program Title</label>
+                                    <input type="text" id="tcNewTitle" class="form-input" placeholder="e.g. Agile Delivery Playbook" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Target Track</label>
+                                    <select id="tcNewTrack" class="form-select" required>
+                                        <option value="Full-Stack Engineering Framework Track">Full-Stack Engineering Framework Track</option>
+                                        <option value="Data Security Compliance & Policy Directory">Data Security Compliance & Policy Directory</option>
+                                        <option value="All Management Matrices Standard">All Management Matrices Standard</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Competency Domain</label>
+                                    <input type="text" id="tcNewDomain" class="form-input" placeholder="e.g. Cybersecurity Resilience" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Delivery Hours</label>
+                                    <input type="number" id="tcNewHours" class="form-input" placeholder="e.g. 12" min="1" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Program Summary</label>
+                                <textarea id="tcNewSummary" class="form-input" rows="3" placeholder="e.g. Practical training on ..." required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100 mt-10">Add Program to Catalog</button>
+                        </form>
+                    </div>
+                </section>
+                <section id="audit-logs" class="section" style="display: none;">
+                    <div class="header">
+                        <h1 class="header-title">System Security Access Logs Tracker</h1>
+                    </div>
+                    <div class="grid-2 mb-20">
+                        <div class="card">
+                            <div class="card-title">Security Log Overview</div>
+                            <div class="settings-overview-grid">
+                                <div class="overview-stat"><strong>Total Events</strong><span id="alTotalEvents">0</span></div>
+                                <div class="overview-stat"><strong>Unique Users</strong><span id="alUniqueUsers">0</span></div>
+                                <div class="overview-stat"><strong>Triggered Alerts</strong><span id="alAlertCount">0</span></div>
+                            </div>
+                            <div class="form-group mt-20">
+                                <label class="form-label">Search Logs</label>
+                                <input type="text" id="alSearchQuery" class="form-input" placeholder="Search by user, action, or resource" oninput="renderAuditLogsTable()">
+                            </div>
+                            <div class="settings-row" style="padding: 12px 0; border-bottom: none;">
+                                <div class="settings-meta"><div class="settings-title">Current Ingestion</div><div class="settings-desc">Realtime system access events are captured and replayed for admin review.</div></div>
+                                <span class="badge badge-warning">Live</span>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-title">Tracker Controls</div>
+                            <p class="text-muted" style="font-size:13px;">Filter events by type and preserve audit snapshots for compliance reporting.</p>
+                            <div class="form-group">
+                                <label class="form-label">Filter by Event Type</label>
+                                <select id="alEventFilter" class="form-select" onchange="renderAuditLogsTable()">
+                                    <option value="All">All Events</option>
+                                    <option value="Login">Login</option>
+                                    <option value="Logout">Logout</option>
+                                    <option value="Auth Failure">Auth Failure</option>
+                                    <option value="Config Change">Config Change</option>
+                                    <option value="Data Access">Data Access</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-primary w-100 mt-20" onclick="saveAuditLogs()">Persist Audit Snapshot</button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">System Security Event Timeline</div>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>User</th>
+                                    <th>Action</th>
+                                    <th>Resource</th>
+                                    <th>Source IP</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="alLogTableBody"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">Audit Review Summary</div>
+                        <div id="alLogSummary" style="font-size:13px; color:#94a3b8;"></div>
+                    </div>
+                </section>
+                <section id="workforce-analytics" class="section" style="display: none;">
+                    <div class="header">
+                        <h1 class="header-title">Workforce Analytics Engine</h1>
+                    </div>
+                    <div class="grid-2 mb-20">
+                        <div class="card">
+                            <div class="card-title">Workforce Performance Summary</div>
+                            <div class="settings-overview-grid">
+                                <div class="overview-stat"><strong>Workforce Size</strong><span id="waTotalWorkforce">0</span></div>
+                                <div class="overview-stat"><strong>Avg Competency</strong><span id="waAvgCompetency">0%</span></div>
+                                <div class="overview-stat"><strong>Training Completion</strong><span id="waCompletionRate">0%</span></div>
+                                <div class="overview-stat"><strong>Skill Gap Index</strong><span id="waSkillGapIndex">0%</span></div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-title">Analytics Controls</div>
+                            <div class="form-group">
+                                <label class="form-label">Department Filter</label>
+                                <select id="waDepartmentFilter" class="form-select" onchange="renderWorkforceAnalyticsCards(); renderWorkforceDepartmentMetrics(); renderWorkforceRiskSummary();">
+                                    <option value="All">All Departments</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Time Range</label>
+                                <select id="waTimeRangeFilter" class="form-select" onchange="renderWorkforceAnalyticsCards(); renderWorkforceDepartmentMetrics(); renderWorkforceRiskSummary();">
+                                    <option value="Quarter">This Quarter</option>
+                                    <option value="Month">This Month</option>
+                                    <option value="Year">This Year</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-primary w-100 mt-20" onclick="refreshWorkforceAnalytics()">Refresh Analytics</button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">Workforce Readiness Distribution</div>
+                        <div id="waReadinessCards" class="settings-overview-grid"></div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">Department Performance Analysis</div>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Department</th>
+                                    <th>Average Score</th>
+                                    <th>Completion</th>
+                                    <th>Critical Gaps</th>
+                                </tr>
+                            </thead>
+                            <tbody id="waDepartmentMetricsBody"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">Workforce Risk Heatmap</div>
+                        <div id="waRiskSummary"></div>
+                    </div>
+                </section>
+                <section id="reporting-module" class="section" style="display: none;">
+                    <div class="header">
+                        <h1 class="header-title">Reporting Engine Workspace Matrix</h1>
+                    </div>
+                    <div class="grid-2 mb-20">
+                        <div class="card">
+                            <div class="card-title">Reporting Summary</div>
+                            <div class="settings-overview-grid">
+                                <div class="overview-stat"><strong>Reports Available</strong><span id="rpTotalReports">0</span></div>
+                                <div class="overview-stat"><strong>Last Export</strong><span id="rpLastExport">N/A</span></div>
+                                <div class="overview-stat"><strong>Pending Jobs</strong><span id="rpPendingJobs">0</span></div>
+                                <div class="overview-stat"><strong>Compliance Rate</strong><span id="rpComplianceRate">0%</span></div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-title">Workspace Controls</div>
+                            <div class="form-group">
+                                <label class="form-label">Report Category</label>
+                                <select id="rpReportCategoryFilter" class="form-select" onchange="renderReportingReportList(); renderReportingSummary();"></select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Date Window</label>
+                                <select id="rpDateWindowFilter" class="form-select" onchange="renderReportingReportList(); renderReportingSummary();">
+                                    <option value="Last 7 Days">Last 7 Days</option>
+                                    <option value="Last 30 Days">Last 30 Days</option>
+                                    <option value="This Quarter">This Quarter</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Export Format</label>
+                                <select id="rpExportFormat" class="form-select">
+                                    <option value="PDF">PDF</option>
+                                    <option value="CSV">CSV</option>
+                                    <option value="XLSX">XLSX</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-primary w-100 mt-20" onclick="generateReportingSnapshot()">Generate Report</button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Available Report Catalog</div>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Report Name</th>
+                                    <th>Category</th>
+                                    <th>Created</th>
+                                    <th>Status</th>
+                                    <th>Rows</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rpReportCatalogBody"></tbody>
+                        </table>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Report Output Ledger</div>
+                        <div id="rpReportOutput" style="font-size:13px; color:#94a3b8; min-height: 120px;"></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Recent Reporting Activity</div>
+                        <div id="rpActivityFeed"></div>
+                    </div>
+                </section>
+
+                <section id="profile" class="section" style="display: none;">
+                    <div class="header">
+                        <h1 class="header-title">Account Center Settings</h1>
+                    </div>
+                    
+                    <div class="grid-profile">
+                        <div>
+                            <div class="profile-sidebar-card">
+                                <div style="background-color: var(--surface-bg); font-size: 32px; width: 70px; height: 70px; margin: 0 auto; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--border-color);">👤</div>
+                                <h3 style="margin-top:12px; font-size:16px; color:#fff;" class="lbl-display-fullname">User Full Name</h3>
+                                <p style="font-size:11px; text-transform:uppercase; color:var(--theme-pill-text); margin-top:4px; font-weight:700;" id="profDisplayRoleBadge">Trainee</p>
+                                
+                                <ul class="profile-nav-list">
+                                    <li class="profile-nav-item active" onclick="switchProfileSubPane('prof-account-pane', this)"><i class="bi bi-person-vcard"></i> Account Details</li>
+                                    <li class="profile-nav-item" onclick="switchProfileSubPane('prof-security-pane', this)"><i class="bi bi-shield-lock"></i> Security & Privacy</li>
+                                    <li class="profile-nav-item" onclick="switchProfileSubPane('prof-prefs-pane', this)"><i class="bi bi-sliders"></i> Preferences</li>
+                                    <li class="profile-nav-item" onclick="switchProfileSubPane('prof-support-pane', this)"><i class="bi bi-info-circle"></i> Support & Platform</li>
+                                </ul>
+                                
+                                <button onclick="handleLogout()" class="btn btn-secondary text-danger w-100 mt-20" style="padding:10px;"><i class="bi bi-box-arrow-left"></i> Logout Session</button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div id="prof-account-pane" class="profile-pane-card active">
+                                <h3 style="color:#fff; margin-bottom:15px; font-size:16px; border-bottom:1px solid var(--border-color); padding-bottom:8px;"><i class="bi bi-person-vcard-fill"></i> Account Information</h3>
+                                
+                                <div class="settings-row">
+                                    <div class="settings-meta"><div class="settings-title">Assigned Enterprise Job Role</div><div class="settings-desc" id="profLabelJobRole">Software Engineer I</div></div>
+                                </div>
+                                <div class="settings-row">
+                                    <div class="settings-meta"><div class="settings-title">Workplace Communication Email Address</div><div class="settings-desc" id="profLabelEmail">user@email.com</div></div>
+                                </div>
+                                <div class="settings-row">
+                                    <div class="settings-meta"><div class="settings-title">Date of Birth Metric</div><div class="settings-desc">September 14, 2002</div></div>
+                                </div>
+                                <div class="settings-row">
+                                    <div class="settings-meta"><div class="settings-title">Short Professional Biography</div><div class="settings-desc" style="font-style:italic;">"Focused on optimization modules, automated validation scripting, and engineering system matrices."</div></div>
+                                </div>
+                            </div>
+
+                            <div id="prof-security-pane" class="profile-pane-card">
+                                <h3 style="color:#fff; margin-bottom:15px; font-size:16px; border-bottom:1px solid var(--border-color); padding-bottom:8px;"><i class="bi bi-shield-lock-fill"></i> Security & Privacy Settings</h3>
+                                
+                                <div class="settings-row">
+                                    <div class="settings-meta"><div class="settings-title">Change Account Access Password</div><div class="settings-desc">Update security verification keys regularly.</div></div>
+                                    <button class="btn btn-secondary btn-sm" onclick="alert('Password modification interface locked by institutional operational policy.')">Update</button>
+                                </div>
+                                <div class="settings-row">
+                                    <div class="settings-meta"><div class="settings-title">Two-Factor Authentication Protocols (2FA)</div><div class="settings-desc">Enforce hardware token authorization barriers.</div></div>
+                                    <span class="badge badge-warning">Inactive State</span>
+                                </div>
+                                <div class="settings-row">
+                                    <div class="settings-meta"><div class="settings-title">Data Privacy & Tracking Controls</div><div class="settings-desc">Manage systemic logging scopes of training completions.</div></div>
+                                    <button class="btn btn-secondary btn-sm" onclick="alert('System tracking telemetry rules are hardcoded by active enterprise research constraints.')">Configure</button>
+                                </div>
+                            </div>
+
+                            <div id="prof-prefs-pane" class="profile-pane-card">
+                                <h3 style="color:#fff; margin-bottom:15px; font-size:16px; border-bottom:1px solid var(--border-color); padding-bottom:8px;"><i class="bi bi-sliders"></i> System Customization Preferences</h3>
+                                
+                                <div class="settings-row">
+                                    <div class="settings-meta"><div class="settings-title">Automated Notification Dispatch Settings</div><div class="settings-desc">Configure push triggers for pending evaluation deadlines.</div></div>
+                                    <span class="badge badge-success">All Dispatches Active</span>
+                                </div>
+                                <div class="settings-row">
+                                    <div class="settings-meta"><div class="settings-title">Localization Language</div><div class="settings-desc">System translation dictionary allocation framework.</div></div>
+                                    <strong style="font-size:13px; color:#aaa;">English (US Corporate Standard)</strong>
+                                </div>
+                                <div class="settings-row">
+                                    <div class="settings-meta"><div class="settings-title">Visual Layout Theme Appearance</div><div class="settings-desc">Toggle viewport render rules colors maps.</div></div>
+                                    <span class="pill-accent">High-Fidelity Dark Mode (Enforced)</span>
+                                </div>
+                            </div>
+
+                            <div id="prof-support-pane" class="profile-pane-card">
+                                <h3 style="color:#fff; margin-bottom:15px; font-size:16px; border-bottom:1px solid var(--border-color); padding-bottom:8px;"><i class="bi bi-info-circle-fill"></i> Help & Platform Metrics</h3>
+                                
+                                <div class="settings-row">
+                                    <div class="settings-meta"><div class="settings-title">Institutional Help Center Documentation</div><div class="settings-desc">Review standard operational procedures, mapping parameters guidelines, and user handbooks.</div></div>
+                                </div>
+                                <div class="settings-row">
+                                    <div class="settings-meta"><div class="settings-title">Terms of Service & Data Authorization Compliance</div><div class="settings-desc">Platform usage constraints and regulatory authorization guidelines.</div></div>
+                                </div>
+                                <div class="settings-row">
+                                    <div class="settings-meta"><div class="settings-title">About SkillUp Enterprise Matrix Engine</div><div class="settings-desc"><strong>Version Alpha 3.8.2026</strong><br>Crafted in validation of technical criteria benchmarks standards.</div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </main>
+        </div>
+    </div>
+
+    <script>
+        let DISTRIBUTED_EVALUATIONS_DB = [
+            {
+                id: "eval_preset_01",
+                title: "PHP Full-Stack Development Evaluation Exam",
+                description: "Appraise core functional performance parameters for framework implementations.",
+                targetCourse: "Full-Stack Engineering Framework Track",
+                questions: [
+                    { type: "scale", text: "Demonstrates consistent execution of 3NF normalization constraints on live production schemas." },
+                    { type: "mc", text: "Identify the correct layer where business data validation mutations should ideally be processed.", options: ["Presentation Template Interface View Component", "Isolated Logic Controller Domain Layer Class", "Global Layout Asset Configurations File"], correctAns: "Isolated Logic Controller Domain Layer Class" },
+                    { type: "paragraph", text: "Provide a high-level description mapping how your secure software deployment pattern architecture acts as a structural defense mechanism." }
+                ],
+                submittedResponsesLogs: [
+                    {
+                        userEmail: "ca.delarama@email.com",
+                        userName: "Clyde Andrei Dela Rama",
+                        submittedAt: "2026-05-18 14:22:10",
+                        isGraded: true,
+                        assignedTotalScore: "13 / 15 Points Assigned",
+                        answers: [
+                            { questionText: "Demonstrates consistent execution of 3NF normalization constraints on live production schemas.", type: "scale", userAnswer: "4", awardedPoints: 4 },
+                            { questionText: "Identify the correct layer where business data validation mutations should ideally be processed.", type: "mc", userAnswer: "Isolated Logic Controller Domain Layer Class", awardedPoints: 5 },
+                            { questionText: "Provide a high-level description mapping how your secure software deployment pattern architecture acts as a structural defense mechanism.", type: "paragraph", userAnswer: "Using compartmentalized repository injection arrays ensures decoupled validation states before data persistence layers lock operational changes.", awardedPoints: 4 }
+                        ]
+                    }
+                ]
+            }
+        ];
+
+        let CURRENT_ACTIVE_SESSION_USER = null;
+        let SYSTEM_USERS_REPOSITORY = {};
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            const email =
+                document.getElementById('loginEmail').value;
+            const password =
+                document.getElementById('loginPassword').value;
+            const formData = new FormData();
+            formData.append('email', email);
+            formData.append('password', password);
+
+            const response = await fetch('login.php', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+            if (data.success) {
+
+                CURRENT_ACTIVE_SESSION_USER = {
+
+                    id: data.user.id,
+
+                    firstName: data.user.first_name,
+
+                    lastName: data.user.last_name,
+
+                    email: data.user.email,
+
+                    role: data.user.role,
+
+                    jobTitle: data.user.job_role
+
+                };
+
+                document.getElementById(
+                    'loginPage'
+                ).style.display = 'none';
+
+                document.getElementById(
+                    'mainDashboard'
+                ).style.display = 'block';
+
+                initializeSessionInterfaceEnvironment();
+
+                loadDynamicDashboardData();
+
+            } else {
+                document.getElementById('loginError').style.display = 'block';
+            }
+        }
+
+        function handleLogout() {
+            CURRENT_ACTIVE_SESSION_USER = null;
+            document.getElementById('dynamicNavMenu').innerHTML = '';
+            document.getElementById('mainDashboard').style.display = 'none';
+            document.getElementById('loginPage').style.display = 'block';
+            document.getElementById('loginEmail').value = "";
+            document.getElementById('loginPassword').value = "";
+        }
+
+        function initializeSessionInterfaceEnvironment() {
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('mainDashboard').style.display = 'block';
+
+            const userFullName = CURRENT_ACTIVE_SESSION_USER.firstName + " " + CURRENT_ACTIVE_SESSION_USER.lastName;
+            document.getElementById('sidebarUserName').innerText = userFullName;
+            document.getElementById('sidebarUserRole').innerText = CURRENT_ACTIVE_SESSION_USER.role;
+
+            document.querySelectorAll('.lbl-display-firstname').forEach(el => el.innerText = CURRENT_ACTIVE_SESSION_USER.firstName);
+            document.querySelectorAll('.lbl-display-fullname').forEach(el => el.innerText = userFullName);
+
+            // Populate high-fidelity profile layout items
+            document.getElementById('profDisplayRoleBadge').innerText = CURRENT_ACTIVE_SESSION_USER.role + " Profile Access Layer";
+            document.getElementById('profLabelJobRole').innerText = CURRENT_ACTIVE_SESSION_USER.jobTitle;
+            document.getElementById('profLabelEmail').innerText = CURRENT_ACTIVE_SESSION_USER.email;
+
+            document.querySelectorAll('.role-view').forEach(view => view.style.display = 'none');
+            
+            if (CURRENT_ACTIVE_SESSION_USER.role === 'trainee') {
+                document.querySelector('.role-view.view-trainee').style.display = 'block';
+                updateTraineeBadgeCounters();
+            } else if (CURRENT_ACTIVE_SESSION_USER.role === 'trainer') {
+                document.querySelector('.role-view.view-trainer').style.display = 'block';
+                syncTrackerSectionRostersListElements();
+            } else if (CURRENT_ACTIVE_SESSION_USER.role === 'admin') {
+                document.querySelector('.role-view.view-admin').style.display = 'block';
+                document.getElementById('adminTotalUsers').innerText = Object.keys(SYSTEM_USERS_REPOSITORY).length;
+                renderAdminActiveProfilesPasswordLedgerPanel();
+            }
+
+            compileDynamicRoleBasedSidebarNavigation();
+            showActiveSectionPane('dashboard');
+            resetGoogleFormsCanvas();
+        }
+
+        function compileDynamicRoleBasedSidebarNavigation() {
+            const navMenuContainer = document.getElementById('dynamicNavMenu');
+            navMenuContainer.innerHTML = "";
+
+            let structuralNavItems = [{ id: 'dashboard', icon: '📊', label: 'Dashboard' }];
+
+            if (CURRENT_ACTIVE_SESSION_USER.role === 'trainee') {
+                structuralNavItems.push(
+                    { id: 'learning-progress', icon: '📉', label: 'Learning Progress' },
+                    { id: 'recommended-training', icon: '📬', label: 'Recommended Training Feed' },
+                    { id: 'skill-gap-results', icon: '🎯', label: 'Skill Gap Results' },
+                    { id: 'answer-evaluations', icon: '📝', label: 'Evaluations'},
+                );
+            } else if (CURRENT_ACTIVE_SESSION_USER.role === 'trainer') {
+                structuralNavItems.push(
+                    { id: 'employee-tracker', icon: '⏱️', label: 'Employee Progress Tracker' },
+                    { id: 'skills-gap-monitor', icon: '👁️', label: 'Skills Gap Monitor' },
+                    { id: 'evaluation-management', icon: '📝', label: 'Evaluations' }
+                );
+            } else if (CURRENT_ACTIVE_SESSION_USER.role === 'admin') {
+                structuralNavItems.push(
+                    { id: 'user-accounts', icon: '👤', label: 'Account Provisioning' },
+                    { id: 'competency-framework', icon: '🧱', label: 'Competency Frameworks' },
+                    { id: 'training-catalog', icon: '🗂️', label: 'Training Catalog Matrix' },
+                    { id: 'audit-logs', icon: '🛡️', label: 'System Security Logs' },
+                    { id: 'workforce-analytics', icon: '📈', label: 'Workforce Analytics' },
+                    { id: 'reporting-module', icon: '📑', label: 'Reporting Module' }
+                );
+            }
+
+            structuralNavItems.push({ id: 'profile', icon: '⚙️', label: 'Account Settings' });
+
+            structuralNavItems.forEach((menuItem, idx) => {
+                const li = document.createElement('li');
+                const anchor = document.createElement('a');
+                if (idx === 0) anchor.className = "active";
+                anchor.innerHTML = `<span class="nav-icon">${menuItem.icon}</span>${menuItem.label}`;
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.querySelectorAll('#dynamicNavMenu a').forEach(a => a.classList.remove('active'));
+                    anchor.classList.add('active');
+                    showActiveSectionPane(menuItem.id);
+                    if (menuItem.id === 'answer-evaluations') renderTraineeEvaluationFeedList();
+                    if (menuItem.id === 'evaluation-management') { resetGoogleFormsCanvas(); renderTrainerDistributedTrackerLogs(); }
+                    if (menuItem.id === 'employee-tracker') syncTrackerSectionRostersListElements();
+                });
+                li.appendChild(anchor);
+                navMenuContainer.appendChild(li);
+            });
+        }
+
+        function showActiveSectionPane(paneId) {
+            document.querySelectorAll('.section').forEach(pane => pane.style.display = 'none');
+            const target = document.getElementById(paneId);
+            if (target) target.style.display = 'block';
+            if (paneId === 'competency-framework') {
+                initializeCompetencyFrameworkSettings();
+            }
+            if (paneId === 'training-catalog') {
+                initializeTrainingCatalogRouter();
+            }
+            if (paneId === 'audit-logs') {
+                initializeAuditLogs();
+            }
+            if (paneId === 'workforce-analytics') {
+                initializeWorkforceAnalyticsEngine();
+            }
+            if (paneId === 'reporting-module') {
+                initializeReportingWorkspace();
+            }
+        }
+
+        const DEFAULT_COMPETENCY_FRAMEWORK_CONFIG = {
+            governanceEnabled: true,
+            categories: [
+                { name: 'Technical Excellence', description: 'Engineering design, secure architecture, and delivery quality.' },
+                { name: 'Leadership & Collaboration', description: 'Team guidance, stakeholder alignment, and change influence.' },
+                { name: 'Learning Agility', description: 'Continuous improvement, adaptive thinking, and knowledge transfer.' },
+                { name: 'Professional Ethics', description: 'Compliance, safety, integrity, and accountability standards.' }
+            ],
+            levels: [
+                { level: 'Foundation', range: '1 - 2', description: 'Understands concepts and needs close guidance to complete tasks.' },
+                { level: 'Practitioner', range: '3', description: 'Independently performs standard work and applies best practices.' },
+                { level: 'Advanced', range: '4', description: 'Leads complex tasks, mentors peers, and improves processes.' },
+                { level: 'Expert', range: '5', description: 'Creates frameworks, drives strategy, and ensures organization readiness.' }
+            ],
+            rules: [
+                { title: 'Weighted evaluation scoring across competencies', enabled: true },
+                { title: 'Mandatory taxonomy alignment for all learning tracks', enabled: true },
+                { title: 'Standardized minimum proficiency requirement for role progression', enabled: true },
+                { title: 'Automated review cycle every quarter', enabled: false }
+            ]
+        };
+
+        let COMPETENCY_FRAMEWORK_CONFIG = {};
+
+        function loadCompetencyFrameworkConfig() {
+            const saved = localStorage.getItem('competencyFrameworkConfig');
+            try {
+                COMPETENCY_FRAMEWORK_CONFIG = saved ? JSON.parse(saved) : DEFAULT_COMPETENCY_FRAMEWORK_CONFIG;
+            } catch (error) {
+                COMPETENCY_FRAMEWORK_CONFIG = DEFAULT_COMPETENCY_FRAMEWORK_CONFIG;
+            }
+        }
+
+        function initializeCompetencyFrameworkSettings() {
+            loadCompetencyFrameworkConfig();
+            document.getElementById('cfGovernanceEnabled').checked = COMPETENCY_FRAMEWORK_CONFIG.governanceEnabled;
+            renderCompetencyFrameworkOverview();
+            renderCompetencyFrameworkDomains();
+            renderCompetencyFrameworkLevels();
+            renderCompetencyFrameworkRules();
+        }
+
+        function renderCompetencyFrameworkOverview() {
+            document.getElementById('cfDomainCount').innerText = COMPETENCY_FRAMEWORK_CONFIG.categories.length;
+            document.getElementById('cfLevelCount').innerText = COMPETENCY_FRAMEWORK_CONFIG.levels.length;
+            document.getElementById('cfRuleCount').innerText = COMPETENCY_FRAMEWORK_CONFIG.rules.length;
+        }
+
+        function renderCompetencyFrameworkDomains() {
+            const tableBody = document.getElementById('cfDomainsTableBody');
+            tableBody.innerHTML = COMPETENCY_FRAMEWORK_CONFIG.categories.map((category, index) => `
+                <tr>
+                    <td>${category.name}</td>
+                    <td>${category.description}</td>
+                    <td><button type="button" class="btn btn-secondary btn-sm" onclick="removeCompetencyFrameworkDomain(${index})">Remove</button></td>
+                </tr>
+            `).join('');
+        }
+
+        function renderCompetencyFrameworkLevels() {
+            const tableBody = document.getElementById('cfLevelsTableBody');
+            tableBody.innerHTML = COMPETENCY_FRAMEWORK_CONFIG.levels.map(level => `
+                <tr>
+                    <td>${level.level}</td>
+                    <td>${level.range}</td>
+                    <td>${level.description}</td>
+                </tr>
+            `).join('');
+        }
+
+        function renderCompetencyFrameworkRules() {
+            const rulesList = document.getElementById('cfRulesList');
+            rulesList.innerHTML = COMPETENCY_FRAMEWORK_CONFIG.rules.map((rule, index) => `
+                <div class="settings-row" style="margin-bottom:12px;">
+                    <div class="settings-meta"><div class="settings-title">${rule.title}</div><div class="settings-desc">${rule.enabled ? 'Enabled' : 'Disabled'}</div></div>
+                    <label class="switch"><input type="checkbox" ${rule.enabled ? 'checked' : ''} onchange="toggleCompetencyRule(${index})"><span class="slider"></span></label>
+                </div>
+            `).join('');
+        }
+
+        function saveCompetencyFrameworkConfig(event) {
+            if (event) event.preventDefault();
+            if (document.getElementById('cfGovernanceEnabled')) {
+                COMPETENCY_FRAMEWORK_CONFIG.governanceEnabled = document.getElementById('cfGovernanceEnabled').checked;
+            }
+            localStorage.setItem('competencyFrameworkConfig', JSON.stringify(COMPETENCY_FRAMEWORK_CONFIG));
+            renderCompetencyFrameworkOverview();
+            renderCompetencyFrameworkDomains();
+            renderCompetencyFrameworkLevels();
+            renderCompetencyFrameworkRules();
+            if (event) {
+                alert('Competency framework settings saved successfully.');
+            }
+        }
+
+        function addCompetencyFrameworkDomain(event) {
+            event.preventDefault();
+            const nameField = document.getElementById('cfNewDomainName');
+            const descriptionField = document.getElementById('cfNewDomainDescription');
+            const name = nameField.value.trim();
+            const description = descriptionField.value.trim();
+
+            if (!name || !description) {
+                alert('Please add both a domain name and description before saving.');
+                return;
+            }
+
+            COMPETENCY_FRAMEWORK_CONFIG.categories.push({ name, description });
+            nameField.value = '';
+            descriptionField.value = '';
+            saveCompetencyFrameworkConfig();
+        }
+
+        function removeCompetencyFrameworkDomain(index) {
+            COMPETENCY_FRAMEWORK_CONFIG.categories.splice(index, 1);
+            saveCompetencyFrameworkConfig();
+        }
+
+        function toggleCompetencyRule(index) {
+            COMPETENCY_FRAMEWORK_CONFIG.rules[index].enabled = !COMPETENCY_FRAMEWORK_CONFIG.rules[index].enabled;
+            saveCompetencyFrameworkConfig();
+        }
+
+        const DEFAULT_TRAINING_CATALOG_ITEMS = [
+            {
+                title: 'Advanced React Patterns',
+                track: 'Full-Stack Engineering Framework Track',
+                domain: 'Frontend Development',
+                summary: 'Reusable component patterns, state management, and performance tuning.',
+                hours: 14,
+                provider: 'Frontend Masters',
+                status: 'Active'
+            },
+            {
+                title: 'System Security & IAM',
+                track: 'Data Security Compliance & Policy Directory',
+                domain: 'Security & Compliance',
+                summary: 'Identity access management, policy review, and secure architecture.',
+                hours: 10,
+                provider: 'AWS Training',
+                status: 'Active'
+            },
+            {
+                title: 'Leadership Influence Lab',
+                track: 'All Management Matrices Standard',
+                domain: 'Leadership & Collaboration',
+                summary: 'Situational leadership, stakeholder communication, and team dynamics.',
+                hours: 8,
+                provider: 'Global Leadership Institute',
+                status: 'Active'
+            },
+            {
+                title: 'AI-Enabled Productivity Systems',
+                track: 'Full-Stack Engineering Framework Track',
+                domain: 'Learning Agility',
+                summary: 'Hands-on AI tooling adoption with practical workflow automation.',
+                hours: 6,
+                provider: 'SkillUp Labs',
+                status: 'Inactive'
+            }
+        ];
+
+        let TRAINING_CATALOG_ITEMS = [];
+
+        function loadTrainingCatalogItems() {
+            const saved = localStorage.getItem('trainingCatalogItems');
+            try {
+                TRAINING_CATALOG_ITEMS = saved ? JSON.parse(saved) : DEFAULT_TRAINING_CATALOG_ITEMS;
+            } catch (error) {
+                TRAINING_CATALOG_ITEMS = DEFAULT_TRAINING_CATALOG_ITEMS;
+            }
+        }
+
+        function initializeTrainingCatalogRouter() {
+            loadTrainingCatalogItems();
+            populateTrainingCatalogTrackFilter();
+            renderTrainingCatalogSummary();
+            renderTrainingCatalogTable();
+            renderTrainingCatalogList();
+        }
+
+        function populateTrainingCatalogTrackFilter() {
+            const filter = document.getElementById('tcTrackFilter');
+            if (!filter) return;
+            const tracks = Array.from(new Set(TRAINING_CATALOG_ITEMS.map(item => item.track)));
+            filter.innerHTML = '<option value="All Tracks">All Tracks</option>' + tracks.map(track => `<option value="${track}">${track}</option>`).join('');
+        }
+
+        function renderTrainingCatalogSummary() {
+            const activeCount = TRAINING_CATALOG_ITEMS.filter(item => item.status === 'Active').length;
+            const trackCount = new Set(TRAINING_CATALOG_ITEMS.map(item => item.track)).size;
+            document.getElementById('tcTotalPrograms').innerText = TRAINING_CATALOG_ITEMS.length;
+            document.getElementById('tcTrackCount').innerText = trackCount;
+            document.getElementById('tcActiveCourses').innerText = activeCount;
+        }
+
+        function renderTrainingCatalogTable() {
+            const filterValue = document.getElementById('tcTrackFilter')?.value || 'All Tracks';
+            const tableBody = document.getElementById('tcCatalogTableBody');
+            if (!tableBody) return;
+            const items = TRAINING_CATALOG_ITEMS.filter(item => filterValue === 'All Tracks' || item.track === filterValue);
+            if (items.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#94a3b8;">No catalog entries match the selected track.</td></tr>';
+                return;
+            }
+            tableBody.innerHTML = items.map((item, index) => `
+                <tr>
+                    <td>${item.title}</td>
+                    <td>${item.track}</td>
+                    <td>${item.domain}</td>
+                    <td>${item.hours}h</td>
+                    <td>${item.status}</td>
+                    <td>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="toggleTrainingCatalogStatus(${index})">${item.status === 'Active' ? 'Archive' : 'Activate'}</button>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="removeTrainingCatalogItem(${index})">Remove</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderTrainingCatalogList() {
+            const filterValue = document.getElementById('tcTrackFilter')?.value || 'All Tracks';
+            const listContainer = document.getElementById('tcCatalogList');
+            if (!listContainer) return;
+            const items = TRAINING_CATALOG_ITEMS.filter(item => filterValue === 'All Tracks' || item.track === filterValue);
+            if (items.length === 0) {
+                listContainer.innerHTML = '<div class="card" style="text-align:center; color:#94a3b8;">No training programs are available for the selected track.</div>';
+                return;
+            }
+            listContainer.innerHTML = items.map(item => `
+                <div class="learning-course-card" style="margin-bottom: 15px; padding: 18px;">
+                    <div class="learning-course-top">
+                        <div class="learning-course-icon${item.status === 'Inactive' ? ' shield' : ''}">
+                            <i class="bi bi-journal-bookmark"></i>
+                        </div>
+                        <div class="learning-course-main">
+                            <div class="learning-course-title">${item.title}</div>
+                            <div class="learning-course-provider">${item.provider} • ${item.track}</div>
+                        </div>
+                        <div class="learning-course-percent">${item.hours}h</div>
+                    </div>
+                    <div class="learning-course-footer">
+                        <span>${item.summary}</span>
+                        <strong>${item.status}</strong>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addTrainingCatalogItem(event) {
+            event.preventDefault();
+            const title = document.getElementById('tcNewTitle').value.trim();
+            const track = document.getElementById('tcNewTrack').value;
+            const domain = document.getElementById('tcNewDomain').value.trim();
+            const hours = parseInt(document.getElementById('tcNewHours').value, 10);
+            const summary = document.getElementById('tcNewSummary').value.trim();
+
+            if (!title || !track || !domain || !summary || isNaN(hours)) {
+                alert('Please complete all training catalog fields before submitting.');
+                return;
+            }
+
+            TRAINING_CATALOG_ITEMS.push({
+                title,
+                track,
+                domain,
+                summary,
+                hours,
+                provider: 'SkillUp Learning Registry',
+                status: 'Active'
+            });
+
+            document.getElementById('tcAddCourseForm').reset();
+            saveTrainingCatalogItems();
+            showActiveSectionPane('training-catalog');
+            alert('New training program added to the catalog.');
+        }
+
+        function removeTrainingCatalogItem(index) {
+            if (!confirm('Remove this training program from the catalog?')) return;
+            TRAINING_CATALOG_ITEMS.splice(index, 1);
+            saveTrainingCatalogItems();
+            renderTrainingCatalogSummary();
+            renderTrainingCatalogTable();
+            renderTrainingCatalogList();
+        }
+
+        function toggleTrainingCatalogStatus(index) {
+            TRAINING_CATALOG_ITEMS[index].status = TRAINING_CATALOG_ITEMS[index].status === 'Active' ? 'Inactive' : 'Active';
+            saveTrainingCatalogItems();
+            renderTrainingCatalogSummary();
+            renderTrainingCatalogTable();
+            renderTrainingCatalogList();
+        }
+
+        function saveTrainingCatalogItems() {
+            localStorage.setItem('trainingCatalogItems', JSON.stringify(TRAINING_CATALOG_ITEMS));
+            renderTrainingCatalogSummary();
+            renderTrainingCatalogTable();
+            renderTrainingCatalogList();
+        }
+
+        const DEFAULT_SECURITY_ACCESS_LOGS = [
+            {
+                timestamp: '2026-05-18 09:12:34',
+                user: 'admin@skillup.local',
+                action: 'Login',
+                resource: 'Dashboard',
+                ip: '192.168.1.22',
+                status: 'Success'
+            },
+            {
+                timestamp: '2026-05-18 09:15:08',
+                user: 'admin@skillup.local',
+                action: 'Config Change',
+                resource: 'User Accounts',
+                ip: '192.168.1.22',
+                status: 'Success'
+            },
+            {
+                timestamp: '2026-05-18 10:02:57',
+                user: 'jane.doe@skillup.local',
+                action: 'Auth Failure',
+                resource: 'Login',
+                ip: '203.0.113.42',
+                status: 'Blocked'
+            },
+            {
+                timestamp: '2026-05-18 11:24:11',
+                user: 'clyde.andrei@skillup.local',
+                action: 'Data Access',
+                resource: 'Trainee Records',
+                ip: '192.168.1.79',
+                status: 'Success'
+            }
+        ];
+
+        let SECURITY_ACCESS_LOGS = [];
+
+        function loadAuditLogs() {
+            const saved = localStorage.getItem('securityAccessLogs');
+            try {
+                SECURITY_ACCESS_LOGS = saved ? JSON.parse(saved) : DEFAULT_SECURITY_ACCESS_LOGS;
+            } catch (error) {
+                SECURITY_ACCESS_LOGS = DEFAULT_SECURITY_ACCESS_LOGS;
+            }
+        }
+
+        function initializeAuditLogs() {
+            loadAuditLogs();
+            document.getElementById('alSearchQuery').value = '';
+            document.getElementById('alEventFilter').value = 'All';
+            renderAuditLogOverview();
+            renderAuditLogsTable();
+        }
+
+        function renderAuditLogOverview() {
+            const uniqueUsers = Array.from(new Set(SECURITY_ACCESS_LOGS.map(log => log.user))).length;
+            const alertCount = SECURITY_ACCESS_LOGS.filter(log => ['Auth Failure', 'Config Change'].includes(log.action)).length;
+            document.getElementById('alTotalEvents').innerText = SECURITY_ACCESS_LOGS.length;
+            document.getElementById('alUniqueUsers').innerText = uniqueUsers;
+            document.getElementById('alAlertCount').innerText = alertCount;
+            document.getElementById('alLogSummary').innerText = `Displaying ${SECURITY_ACCESS_LOGS.length} security events. Filter by event type or search text to narrow the audit trail.`;
+        }
+
+        function renderAuditLogsTable() {
+            const query = document.getElementById('alSearchQuery')?.value.trim().toLowerCase() || '';
+            const filter = document.getElementById('alEventFilter')?.value || 'All';
+            const tableBody = document.getElementById('alLogTableBody');
+            if (!tableBody) return;
+
+            const filteredLogs = SECURITY_ACCESS_LOGS.filter(log => {
+                const matchesFilter = filter === 'All' || log.action === filter;
+                const matchesQuery = query === '' || [log.timestamp, log.user, log.action, log.resource, log.ip, log.status].some(field => field.toLowerCase().includes(query));
+                return matchesFilter && matchesQuery;
+            });
+
+            if (filteredLogs.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#94a3b8;">No log events match the current search and filter criteria.</td></tr>';
+                document.getElementById('alLogSummary').innerText = 'No matching audit events found.';
+                return;
+            }
+
+            tableBody.innerHTML = filteredLogs.map(log => `
+                <tr>
+                    <td>${log.timestamp}</td>
+                    <td>${log.user}</td>
+                    <td>${log.action}</td>
+                    <td>${log.resource}</td>
+                    <td>${log.ip}</td>
+                    <td>${log.status}</td>
+                </tr>
+            `).join('');
+
+            document.getElementById('alLogSummary').innerText = `Showing ${filteredLogs.length} of ${SECURITY_ACCESS_LOGS.length} total events.`;
+        }
+
+        function saveAuditLogs() {
+            localStorage.setItem('securityAccessLogs', JSON.stringify(SECURITY_ACCESS_LOGS));
+            renderAuditLogOverview();
+            renderAuditLogsTable();
+            alert('Audit log snapshot persisted successfully.');
+        }
+
+        const DEFAULT_REPORTING_WORKSPACE = {
+            lastExport: '2026-05-19 18:20:14',
+            pendingJobs: 2,
+            complianceRate: 92,
+            categories: ['Learning', 'Security', 'Operations', 'Compliance'],
+            reports: [
+                { name: 'Competency Gap Summary', category: 'Learning', created: '2026-05-18', status: 'Ready', rows: 142 },
+                { name: 'Security Compliance Audit', category: 'Security', created: '2026-05-17', status: 'Ready', rows: 58 },
+                { name: 'Training Completion Digest', category: 'Operations', created: '2026-05-16', status: 'Queued', rows: 96 },
+                { name: 'Executive ECM Snapshot', category: 'Compliance', created: '2026-05-14', status: 'Ready', rows: 34 }
+            ],
+            activity: [
+                { time: '2026-05-19 18:20', detail: 'Exported Competency Gap Summary as PDF.' },
+                { time: '2026-05-19 16:45', detail: 'Scheduled Security Compliance Audit report.' },
+                { time: '2026-05-19 09:10', detail: 'Refreshed report catalog data.' }
+            ]
+        };
+
+        let REPORTING_WORKSPACE = {};
+
+        function loadReportingWorkspace() {
+            const saved = localStorage.getItem('reportingWorkspace');
+            try {
+                REPORTING_WORKSPACE = saved ? JSON.parse(saved) : DEFAULT_REPORTING_WORKSPACE;
+            } catch (error) {
+                REPORTING_WORKSPACE = DEFAULT_REPORTING_WORKSPACE;
+            }
+        }
+
+        function initializeReportingWorkspace() {
+            loadReportingWorkspace();
+            populateReportingWorkspaceFilters();
+            renderReportingOverview();
+            renderReportingReportList();
+            renderReportingSummary();
+            renderReportingActivityFeed();
+        }
+
+        function populateReportingWorkspaceFilters() {
+            const categoryFilter = document.getElementById('rpReportCategoryFilter');
+            if (!categoryFilter) return;
+            categoryFilter.innerHTML = '<option value="All">All Categories</option>' + REPORTING_WORKSPACE.categories.map(category => `<option value="${category}">${category}</option>`).join('');
+        }
+
+        function renderReportingOverview() {
+            document.getElementById('rpTotalReports').innerText = REPORTING_WORKSPACE.reports.length;
+            document.getElementById('rpLastExport').innerText = REPORTING_WORKSPACE.lastExport;
+            document.getElementById('rpPendingJobs').innerText = REPORTING_WORKSPACE.pendingJobs;
+            document.getElementById('rpComplianceRate').innerText = `${REPORTING_WORKSPACE.complianceRate}%`;
+        }
+
+        function renderReportingReportList() {
+            const filter = document.getElementById('rpReportCategoryFilter')?.value || 'All';
+            const rows = document.getElementById('rpReportCatalogBody');
+            if (!rows) return;
+            const reports = filter === 'All' ? REPORTING_WORKSPACE.reports : REPORTING_WORKSPACE.reports.filter(report => report.category === filter);
+            if (reports.length === 0) {
+                rows.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#94a3b8;">No reports match the selected category.</td></tr>';
+                return;
+            }
+            rows.innerHTML = reports.map(report => `
+                <tr>
+                    <td>${report.name}</td>
+                    <td>${report.category}</td>
+                    <td>${report.created}</td>
+                    <td>${report.status}</td>
+                    <td>${report.rows}</td>
+                </tr>
+            `).join('');
+        }
+
+        function renderReportingSummary() {
+            const category = document.getElementById('rpReportCategoryFilter')?.value || 'All';
+            const dateWindow = document.getElementById('rpDateWindowFilter')?.value || 'Last 7 Days';
+            const format = document.getElementById('rpExportFormat')?.value || 'PDF';
+            const output = document.getElementById('rpReportOutput');
+            if (!output) return;
+            output.innerHTML = `
+                <div style="margin-bottom:12px;">Current workspace is configured to produce a <strong>${format}</strong> report for <strong>${category}</strong> over the <strong>${dateWindow}</strong> window.</div>
+                <div style="font-size:13px; color:#94a3b8;">Generated report previews are added to the activity feed and saved for audit review.</div>
+            `;
+        }
+
+        function renderReportingActivityFeed() {
+            const feed = document.getElementById('rpActivityFeed');
+            if (!feed) return;
+            if (REPORTING_WORKSPACE.activity.length === 0) {
+                feed.innerHTML = '<div class="card" style="text-align:center; color:#94a3b8;">No recent reporting activity.</div>';
+                return;
+            }
+            feed.innerHTML = REPORTING_WORKSPACE.activity.map(item => `
+                <div class="settings-row" style="padding:10px; margin-bottom:10px; border-radius:10px; border:1px solid var(--border-color); background: var(--surface-bg);">
+                    <div class="settings-meta"><div class="settings-title">${item.detail}</div><div class="settings-desc">${item.time}</div></div>
+                </div>
+            `).join('');
+        }
+
+        function generateReportingSnapshot() {
+            const category = document.getElementById('rpReportCategoryFilter')?.value || 'All';
+            const dateWindow = document.getElementById('rpDateWindowFilter')?.value || 'Last 7 Days';
+            const format = document.getElementById('rpExportFormat')?.value || 'PDF';
+            const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
+            REPORTING_WORKSPACE.lastExport = timestamp;
+            REPORTING_WORKSPACE.pendingJobs = Math.max(REPORTING_WORKSPACE.pendingJobs - 1, 0);
+            REPORTING_WORKSPACE.activity.unshift({ time: timestamp, detail: `Generated ${category} report in ${format} for ${dateWindow}.` });
+            if (REPORTING_WORKSPACE.activity.length > 5) REPORTING_WORKSPACE.activity.pop();
+            saveReportingWorkspace();
+            renderReportingOverview();
+            renderReportingReportList();
+            renderReportingSummary();
+            renderReportingActivityFeed();
+            alert('Reporting workspace refresh completed.');
+        }
+
+        function saveReportingWorkspace() {
+            localStorage.setItem('reportingWorkspace', JSON.stringify(REPORTING_WORKSPACE));
+        }
+
+        const DEFAULT_WORKFORCE_ANALYTICS = {
+            totalWorkforce: 128,
+            avgCompetency: 78,
+            completionRate: 72,
+            skillGapIndex: 18,
+            departments: [
+                { name: 'Engineering', avgScore: 84, completion: 76, criticalGaps: 8 },
+                { name: 'Security', avgScore: 79, completion: 66, criticalGaps: 11 },
+                { name: 'Operations', avgScore: 74, completion: 69, criticalGaps: 14 },
+                { name: 'Product', avgScore: 81, completion: 72, criticalGaps: 9 },
+                { name: 'Customer Success', avgScore: 72, completion: 64, criticalGaps: 16 }
+            ],
+            riskSummary: [
+                { title: 'High Turnover Risk', score: '22%', description: 'Workforce churn predicted based on training completion and engagement.' },
+                { title: 'Skills Shortfall', score: '18%', description: 'Critical competency gaps across active learning tracks.' },
+                { title: 'Productivity Drag', score: '12%', description: 'Low training completion in operations and support teams.' }
+            ]
+        };
+
+        let WORKFORCE_ANALYTICS = {};
+
+        function loadWorkforceAnalytics() {
+            const saved = localStorage.getItem('workforceAnalytics');
+            try {
+                WORKFORCE_ANALYTICS = saved ? JSON.parse(saved) : DEFAULT_WORKFORCE_ANALYTICS;
+            } catch (error) {
+                WORKFORCE_ANALYTICS = DEFAULT_WORKFORCE_ANALYTICS;
+            }
+        }
+
+        function initializeWorkforceAnalyticsEngine() {
+            loadWorkforceAnalytics();
+            populateWorkforceDepartmentFilter();
+            renderWorkforceAnalyticsOverview();
+            renderWorkforceAnalyticsCards();
+            renderWorkforceDepartmentMetrics();
+            renderWorkforceRiskSummary();
+        }
+
+        function populateWorkforceDepartmentFilter() {
+            const filter = document.getElementById('waDepartmentFilter');
+            if (!filter) return;
+            const departments = WORKFORCE_ANALYTICS.departments.map(item => item.name);
+            filter.innerHTML = '<option value="All">All Departments</option>' + departments.map(name => `<option value="${name}">${name}</option>`).join('');
+        }
+
+        function renderWorkforceAnalyticsOverview() {
+            document.getElementById('waTotalWorkforce').innerText = WORKFORCE_ANALYTICS.totalWorkforce;
+            document.getElementById('waAvgCompetency').innerText = `${WORKFORCE_ANALYTICS.avgCompetency}%`;
+            document.getElementById('waCompletionRate').innerText = `${WORKFORCE_ANALYTICS.completionRate}%`;
+            document.getElementById('waSkillGapIndex').innerText = `${WORKFORCE_ANALYTICS.skillGapIndex}%`;
+        }
+
+        function renderWorkforceAnalyticsCards() {
+            const filter = document.getElementById('waDepartmentFilter')?.value || 'All';
+            const cardsContainer = document.getElementById('waReadinessCards');
+            if (!cardsContainer) return;
+
+            const departments = filter === 'All' ? WORKFORCE_ANALYTICS.departments : WORKFORCE_ANALYTICS.departments.filter(item => item.name === filter);
+            cardsContainer.innerHTML = departments.map(dept => `
+                <div class="overview-stat" style="background: var(--surface-bg); padding: 20px; min-height: 140px;">
+                    <strong>${dept.name}</strong>
+                    <div style="font-size: 32px; margin-top: 10px; color: var(--text-light);">${dept.avgScore}%</div>
+                    <div style="font-size: 13px; color: #94a3b8; margin-top: 8px;">Average Competency Score</div>
+                    <div class="progress-bar" style="margin-top: 15px;"><div class="progress-fill" style="width: ${dept.completion}%;"></div></div>
+                    <div style="font-size: 12px; color: #94a3b8; margin-top: 8px;">Training Completion: ${dept.completion}% | Critical Gaps: ${dept.criticalGaps}%</div>
+                </div>
+            `).join('');
+        }
+
+        function renderWorkforceDepartmentMetrics() {
+            const filter = document.getElementById('waDepartmentFilter')?.value || 'All';
+            const tableBody = document.getElementById('waDepartmentMetricsBody');
+            if (!tableBody) return;
+            const departments = filter === 'All' ? WORKFORCE_ANALYTICS.departments : WORKFORCE_ANALYTICS.departments.filter(item => item.name === filter);
+            if (departments.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#94a3b8;">No departments match the selected filter.</td></tr>';
+                return;
+            }
+            tableBody.innerHTML = departments.map(dept => `
+                <tr>
+                    <td>${dept.name}</td>
+                    <td>${dept.avgScore}%</td>
+                    <td>${dept.completion}%</td>
+                    <td>${dept.criticalGaps}%</td>
+                </tr>
+            `).join('');
+        }
+
+        function renderWorkforceRiskSummary() {
+            const filter = document.getElementById('waDepartmentFilter')?.value || 'All';
+            const summaryContainer = document.getElementById('waRiskSummary');
+            if (!summaryContainer) return;
+            const items = WORKFORCE_ANALYTICS.riskSummary;
+            summaryContainer.innerHTML = items.map(item => `
+                <div class="settings-row" style="margin-bottom: 12px;">
+                    <div class="settings-meta"><div class="settings-title">${item.title}</div><div class="settings-desc">${item.description}</div></div>
+                    <span class="badge badge-warning">${item.score}</span>
+                </div>
+            `).join('');
+        }
+
+        function refreshWorkforceAnalytics() {
+            WORKFORCE_ANALYTICS.totalWorkforce += 0;
+            saveWorkforceAnalytics();
+            initializeWorkforceAnalyticsEngine();
+            alert('Workforce analytics updated.');
+        }
+
+        function saveWorkforceAnalytics() {
+            localStorage.setItem('workforceAnalytics', JSON.stringify(WORKFORCE_ANALYTICS));
+        }
+
+        function updateTraineeBadgeCounters() {
+            const applicableForms = DISTRIBUTED_EVALUATIONS_DB.filter(ev => 
+                (ev.targetCourse === "All Tracks" || ev.targetCourse === CURRENT_ACTIVE_SESSION_USER.track) &&
+                (!ev.submittedResponsesLogs.some(r => r.userEmail === CURRENT_ACTIVE_SESSION_USER.email))
+            );
+            const counterLabel = document.getElementById('lblPendingEvalCount');
+            if (counterLabel) counterLabel.innerText = applicableForms.length;
+        }
+
+        // PROFILE VIEW TAB SUB-ROUTER
+        function switchProfileSubPane(targetPaneId, clickedTabNode) {
+            document.querySelectorAll('.profile-pane-card').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.profile-nav-item').forEach(i => i.classList.remove('active'));
+            
+            document.getElementById(targetPaneId).classList.add('active');
+            clickedTabNode.classList.add('active');
+        }
+
+        // --- SECTION 7 CONTROLLER: SYSTEM ROSTER SYNC VIEWS ---
+        async function syncTrackerSectionRostersListElements() {
+            const target =
+                document.getElementById(
+                    'trackerTraineeCardsTargetList'
+                );
+
+            if(!target) return;
+            target.innerHTML = `
+                <div style="
+                    padding:20px;
+                    text-align:center;
+                    color:#94a3b8;
+                ">
+                    Loading trainees...
+                </div>
+            `;
+
+            try {
+                const response =
+                    await fetch(
+                        'api/get_trainees.php'
+                    );
+
+                const data =
+                    await response.json();
+                if(
+                    !data.success
+                ) {
+                    throw new Error(
+                        'API failed'
+                    );
+                }
+
+                if(
+                    !data.trainees ||
+                    data.trainees.length === 0
+                ) {
+                    target.innerHTML = `
+                        <div style="
+                            padding:20px;
+                            text-align:center;
+                            color:#94a3b8;
+                        ">
+                            No trainees found.
+                        </div>
+                    `;
+                    return;
+                }
+
+                target.innerHTML = '';
+
+                data.trainees.forEach((trainee)=>{
+
+                    const initials =
+                        (
+                            trainee.first_name?.[0] || ''
+                        ) +
+                        (
+                            trainee.last_name?.[0] || ''
+                        );
+
+                    target.innerHTML += `
+
+                    <div
+                        class="interactive-trainee-card card mb-10"
+                        onclick="
+                            openTraineeDrawer(
+                                ${trainee.id},
+                                '${trainee.first_name}',
+                                '${trainee.last_name}',
+                                '${trainee.email}',
+                                '${trainee.job_role}'
+                            )
+                        "
+                    >
+
+                        <div class="flex align-center gap-15">
+
+                            <div class="trainee-avatar">
+                                ${initials}
+                            </div>
+
+                            <div>
+
+                                <div style="
+                                    font-weight:700;
+                                    color:white;
+                                ">
+                                    ${trainee.first_name}
+                                    ${trainee.last_name}
+                                </div>
+
+                                <div style="
+                                    color:#94a3b8;
+                                    font-size:13px;
+                                    margin-top:4px;
+                                ">
+                                    ${trainee.job_role || 'Employee'}
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    `;
+
+                });
+
+            } catch(error) {
+
+                console.error(error);
+
+                target.innerHTML = `
+                    <div style="
+                        padding:20px;
+                        text-align:center;
+                        color:#ef4444;
+                    ">
+                        Failed to load trainees.
+                    </div>
+                `;
+
+            }
+
+        }
+
+
+        function openTraineeDrawer(
+            id,
+            firstName,
+            lastName,
+            email,
+            jobRole
+        ) {
+
+            document.getElementById(
+                'emptyDrawerFallbackNotice'
+            ).style.display = 'none';
+
+            document.getElementById(
+                'traineeHighFidelityDrawerCard'
+            ).style.display = 'block';
+
+            document.getElementById(
+                'drawerTraineeName'
+            ).innerText =
+                firstName + ' ' + lastName;
+
+            document.getElementById(
+                'drawerTraineeEmail'
+            ).innerText = email;
+
+            document.getElementById(
+                'drawerTraineeTrack'
+            ).innerText =
+                jobRole || 'Employee';
+
+            document.getElementById(
+                'drawerTraineeProgressPct'
+            ).innerText = '74%';
+
+            document.getElementById(
+                'drawerTraineeProgressBarFill'
+            ).style.width = '74%';
+
+            document.getElementById(
+                'drawerTraineeHistoryLog'
+            ).innerHTML = `
+
+                <div class="learning-item">
+
+                    <div class="learning-header">
+
+                        <div class="learning-title">
+                            Completed Security Assessment
+                        </div>
+
+                        <span class="
+                            badge badge-success
+                        ">
+                            Passed
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <div class="learning-item gap">
+
+                    <div class="learning-header">
+
+                        <div class="learning-title">
+                            Cloud Architecture Gap
+                        </div>
+
+                        <span class="
+                            badge badge-danger
+                        ">
+                            Needs Training
+                        </span>
+
+                    </div>
+                    
+                </div>
+            `;
+        }
+
+        function openTraineeHighFidelityDetails(traineeEmailAddressKey) {
+            const traineeMetadataSource = SYSTEM_USERS_REPOSITORY[traineeEmailAddressKey];
+            if(!traineeMetadataSource) return;
+
+            document.getElementById('emptyDrawerFallbackNotice').style.display = 'none';
+            const drawerElementCanvas = document.getElementById('traineeHighFidelityDrawerCard');
+            drawerElementCanvas.style.display = 'block';
+
+            document.getElementById('drawerTraineeName').innerText = traineeMetadataSource.firstName + " " + traineeMetadataSource.lastName;
+            document.getElementById('drawerTraineeEmail').innerText = traineeEmailAddressKey;
+            document.getElementById('drawerTraineeTrack').innerText = traineeMetadataSource.track;
+            document.getElementById('drawerTraineeProgressPct').innerText = traineeMetadataSource.baselinePct;
+            document.getElementById('drawerTraineeProgressBarFill').style.width = traineeMetadataSource.baselinePct;
+
+            const historyLogContainer = document.getElementById('drawerTraineeHistoryLog');
+            historyLogContainer.innerHTML = "";
+
+            let verifiedSubmissionMatches = [];
+            DISTRIBUTED_EVALUATIONS_DB.forEach(evalRecord => {
+                const searchSubmissionMatch = evalRecord.submittedResponsesLogs.find(r => r.userEmail === traineeEmailAddressKey);
+                if(searchSubmissionMatch) {
+                    verifiedSubmissionMatches.push({
+                        formTitle: evalRecord.title,
+                        timestamp: searchSubmissionMatch.submittedAt,
+                        statusString: searchSubmissionMatch.isGraded ? `Graded: ${searchSubmissionMatch.assignedTotalScore}` : "Awaiting Points Audit"
+                    });
+                }
+            });
+
+            if(verifiedSubmissionMatches.length === 0) {
+                historyLogContainer.innerHTML = `<p class="text-muted" style="font-size:12px; font-style:italic;">No historical appraisal response files matched this profile token signature.</p>`;
+            } else {
+                verifiedSubmissionMatches.forEach(logItem => {
+                    const blockLogElement = document.createElement('div');
+                    blockLogElement.style.padding = "10px";
+                    blockLogElement.style.background = "var(--surface-bg)";
+                    blockLogElement.style.borderRadius = "6px";
+                    blockLogElement.style.marginBottom = "8px";
+                    blockLogElement.style.borderLeft = "4px solid var(--primary-bg)";
+                    blockLogElement.innerHTML = `
+                        <div style="font-size:13px; font-weight:600; color:#fff;">${logItem.formTitle}</div>
+                        <div class="flex justify-between mt-10" style="font-size:11px; color:#aaa;">
+                            <span style="color:var(--warning-color);">${logItem.statusString}</span>
+                            <span>${logItem.timestamp}</span>
+                        </div>
+                    `;
+                    historyLogContainer.appendChild(blockLogElement);
+                });
+            }
+        }
+
+        // --- SECTION 9 CONTROLLER: TRAINER SWITCH VIEW TABS MODES AND TRACKER ---
+        function switchTrainerHubViewMode(targetSubmode) {
+            const btnBuilder = document.getElementById('btnTabShowBuilder');
+            const btnTracker = document.getElementById('btnTabShowTracker');
+            const paneBuilder = document.getElementById('trainerHubBuilderSubpane');
+            const paneTracker = document.getElementById('trainerHubTrackerSubpane');
+
+            if(targetSubmode === 'builder') {
+                btnBuilder.className = "btn btn-primary";
+                btnTracker.className = "btn btn-secondary";
+                paneBuilder.style.display = 'block';
+                paneTracker.style.display = 'none';
+            } else {
+                btnBuilder.className = "btn btn-secondary";
+                btnTracker.className = "btn btn-primary";
+                paneBuilder.style.display = 'none';
+                paneTracker.style.display = 'block';
+                exitGradingConsoleWorkspace();
+            }
+        }
+
+        function renderTrainerDistributedTrackerLogs() {
+            const trackerContainer = document.getElementById('trainerDistributedFormsTrackerContainer');
+            if(!trackerContainer) return;
+            trackerContainer.innerHTML = "";
+
+            DISTRIBUTED_EVALUATIONS_DB.forEach(formItem => {
+                const logItemCard = document.createElement('div');
+                logItemCard.className = "learning-item";
+                logItemCard.style.background = "var(--surface-bg)";
+                logItemCard.style.padding = "15px";
+                logItemCard.style.marginBottom = "12px";
+                
+                let targetedWorkersPopulationCount = 0;
+                Object.keys(SYSTEM_USERS_REPOSITORY).forEach(k => {
+                    if(SYSTEM_USERS_REPOSITORY[k].role === 'trainee') {
+                        if(formItem.targetCourse === "All Tracks" || SYSTEM_USERS_REPOSITORY[k].track === formItem.targetCourse) {
+                            targetedWorkersPopulationCount++;
+                        }
+                    }
+                });
+
+                const responsesSubmittedCount = formItem.submittedResponsesLogs.length;
+                const mathematicalCompletionRatePct = targetedWorkersPopulationCount > 0 ? Math.round((responsesSubmittedCount / targetedWorkersPopulationCount) * 100) : 0;
+
+                logItemCard.innerHTML = `
+                    <div class="flex justify-between align-center">
+                        <div>
+                            <h3 style="margin:0; font-size:16px; color:#fff;">${formItem.title}</h3>
+                            <span class="pill-accent" style="margin-top:5px; display:inline-block;"><i class="bi bi-tag"></i> Target Scope: ${formItem.targetCourse}</span>
+                        </div>
+                        <div style="text-align:right;"><span class="badge badge-success" style="font-size:12px;">${responsesSubmittedCount} Submitted Responses</span></div>
+                    </div>
+                `;
+
+                if(formItem.submittedResponsesLogs.length > 0) {
+                    let subTableMarkup = `<div style="margin-top:15px; padding-top:10px; border-top:1px solid var(--border-color);">`;
+                    formItem.submittedResponsesLogs.forEach((resp, respIdx) => {
+                        const gradingScoreTextIndicator = resp.isGraded ? `<strong>Score Key: ${resp.assignedTotalScore}</strong>` : `<span style="color:var(--warning-color);">Awaiting Point Matrix Audit</span>`;
+                        subTableMarkup += `
+                            <div class="flex justify-between align-center" style="font-size:13px; padding:8px 0; border-bottom:1px dashed #2d3748;">
+                                <span>👤 ${resp.userName}</span>
+                                <div class="flex align-center gap-15">
+                                    <span style="font-size:11px; color:#aaa;">${gradingScoreTextIndicator}</span>
+                                    <button type="button" class="btn btn-primary" style="padding:4px 8px; font-size:11px;" onclick="launchTrainerLiveGradingConsole('${formItem.id}', ${respIdx})"><i class="bi bi-bookmark-star"></i> Grade Response</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    subTableMarkup += `</div>`;
+                    logItemCard.innerHTML += subTableMarkup;
+                }
+                trackerContainer.appendChild(logItemCard);
+            });
+        }
+
+        // --- TRAINER CONTROLLER: ACTIVE GRADING ENGINE AND POINT CONSOLE ---
+        let ACTIVE_GRADING_FORM_REF = null;
+        let ACTIVE_GRADING_RESP_INDEX_REF = null;
+
+        function launchTrainerLiveGradingConsole(formId, responseIndex) {
+            const formObj = DISTRIBUTED_EVALUATIONS_DB.find(f => f.id === formId);
+            if(!formObj) return;
+            const responseObj = formObj.submittedResponsesLogs[responseIndex];
+            if(!responseObj) return;
+
+            ACTIVE_GRADING_FORM_REF = formId;
+            ACTIVE_GRADING_RESP_INDEX_REF = responseIndex;
+
+            document.getElementById('trainerTrackerGlobalListView').style.display = 'none';
+            const consoleWorkspace = document.getElementById('trainerLiveGradingWorkspaceConsole');
+            consoleWorkspace.style.display = 'block';
+
+            document.getElementById('gradeConsoleFormTitle').innerText = formObj.title;
+            document.getElementById('gradeConsoleSubMeta').innerText = `Reviewing submission from ${responseObj.userName} (${responseObj.userEmail})`;
+            document.getElementById('gradeConsoleRunningScoreLabel').innerText = `Grading Current Evaluation`;
+
+            const renderingCanvas = document.getElementById('trainerGradingQuestionsRenderCanvas');
+            renderingCanvas.innerHTML = "";
+
+            responseObj.answers.forEach((ans, idx) => {
+                const questionBlockNode = document.createElement('div');
+                questionBlockNode.className = "grading-question-item";
+                
+                let answerValidationBlockMarkup = "";
+                if(ans.type === 'mc') {
+                    const originalQuestionConfig = formObj.questions[idx];
+                    const answerStatusText = (ans.userAnswer === originalQuestionConfig.correctAns) ? 
+                        `<span style="color:var(--success-color); font-weight:700;"><i class="bi bi-check-circle-fill"></i> Automated Check: Match Key Correct</span>` : 
+                        `<span style="color:var(--accent-color); font-weight:700;"><i class="bi bi-x-circle-fill"></i> Automated Check: Mismatch Key</span>`;
+                    
+                    answerValidationBlockMarkup = `
+                        <div style="font-size:12px; margin-top:5px; background:rgba(0,0,0,0.2); padding:8px; border-radius:4px;">
+                            <div>Expected Verified Key: <strong style="color:var(--success-color);">${originalQuestionConfig.correctAns}</strong></div>
+                            <div>Provided Target Answer: <strong style="color:#fff;">${ans.userAnswer}</strong></div>
+                            <div class="mt-10">${answerStatusText}</div>
+                        </div>
+                    `;
+                } else {
+                    answerValidationBlockMarkup = `
+                        <div style="font-size:12px; margin-top:5px; background:rgba(0,0,0,0.2); padding:8px; border-radius:4px; border-left: 3px solid var(--warning-color);">
+                            <div style="color:#aaa; font-weight:600;">Open-Ended Trainee Response:</div>
+                            <div style="color:#fff; margin-top:4px; font-family:sans-serif; line-height:1.4;">"${ans.userAnswer}"</div>
+                        </div>
+                    `;
+                }
+
+                const currentSavedPoints = ans.awardedPoints !== undefined ? ans.awardedPoints : 5;
+
+                questionBlockNode.innerHTML = `
+                    <div style="font-weight:600; font-size:14px; color:#fff;">Q${idx+1}: ${ans.questionText}</div>
+                    <div style="font-size:11px; color:#aaa; text-transform:uppercase; margin-top:2px;">Field Mechanism: ${ans.type}</div>
+                    ${answerValidationBlockMarkup}
+                    
+                    <div class="form-group" style="margin-top:12px; max-width:220px;">
+                        <label class="form-label" style="font-size:11px; color:var(--theme-pill-text);"><i class="bi bi-award"></i> Assign Score Value Point Matrix</label>
+                        <select class="form-select input-trainer-awarded-points-node" style="padding:6px 10px; font-size:12px; margin-top:4px;">
+                            <option value="5" ${currentSavedPoints == 5 ? 'selected' : ''}>5 / 5 - Exceptional Baseline</option>
+                            <option value="4" ${currentSavedPoints == 4 ? 'selected' : ''}>4 / 5 - Validated Mastered</option>
+                            <option value="3" ${currentSavedPoints == 3 ? 'selected' : ''}>3 / 5 - Meets Expectations</option>
+                            <option value="2" ${currentSavedPoints == 2 ? 'selected' : ''}>2 / 5 - Deficiencies Found</option>
+                            <option value="1" ${currentSavedPoints == 1 ? 'selected' : ''}>1 / 5 - Critical Remediation Need</option>
+                            <option value="0" ${currentSavedPoints == 0 ? 'selected' : ''}>0 / 5 - No Marks Awarded</option>
+                        </select>
+                    </div>
+                `;
+                renderingCanvas.appendChild(questionBlockNode);
+            });
+        }
+
+        function exitGradingConsoleWorkspace() {
+            document.getElementById('trainerLiveGradingWorkspaceConsole').style.display = 'none';
+            document.getElementById('trainerTrackerGlobalListView').style.display = 'block';
+            renderTrainerDistributedTrackerLogs();
+        }
+
+        function commitAssignedPointsGradingAudit(e) {
+            e.preventDefault();
+            const formObj = DISTRIBUTED_EVALUATIONS_DB.find(f => f.id === ACTIVE_GRADING_FORM_REF);
+            const responseObj = formObj.submittedResponsesLogs[ACTIVE_GRADING_RESP_INDEX_REF];
+
+            const selectsCollection = document.querySelectorAll('.input-trainer-awarded-points-node');
+            let totalAccumulatedPoints = 0;
+            let maximumPossiblePoints = selectsCollection.length * 5;
+
+            selectsCollection.forEach((selectElem, index) => {
+                const pointsVal = parseInt(selectElem.value);
+                totalAccumulatedPoints += pointsVal;
+                responseObj.answers[index].awardedPoints = pointsVal;
+            });
+
+            responseObj.isGraded = true;
+            responseObj.assignedTotalScore = `${totalAccumulatedPoints} / ${maximumPossiblePoints} Points`;
+
+            alert(`Points audit locked permanently.\nTrainee Performance Profile updated to: ${responseObj.assignedTotalScore}`);
+            exitGradingConsoleWorkspace();
+        }
+
+        // --- TRAINER CONTROLLER: GOOGLE FORMS SCHEMATIC ASSEMBLY CANVAS ---
+        function resetGoogleFormsCanvas() {
+            const gformTitle = document.getElementById('gformTitle');
+            if (!gformTitle) return; // trainer-only section not present for other roles
+            gformTitle.value = "Untitled Evaluation Form";
+            document.getElementById('gformDesc').value = "Please fill out this evaluation form completely to update framework competency benchmarks.";
+            document.getElementById('gformTargetCourseRestriction').selectedIndex = 0;
+            const sandbox = document.getElementById('gformQuestionsSandbox');
+            sandbox.innerHTML = "";
+            appendGoogleFormQuestionBlock();
+        }
+
+        function appendGoogleFormQuestionBlock() {
+            const sandbox = document.getElementById('gformQuestionsSandbox');
+            const uid = "q_block_" + Date.now() + "_" + Math.floor(Math.random() * 100);
+            
+            const qCard = document.createElement('div');
+            qCard.className = "gform-card";
+            qCard.id = uid;
+            qCard.innerHTML = `
+                <div class="grid-2" style="margin-bottom: 15px;">
+                    <div><input type="text" class="gform-q-input q-text-value" placeholder="Evaluation Metric / Question Text" required></div>
+                    <div>
+                        <select class="form-select q-type-selector" onchange="toggleFormQuestionTypeOptions('${uid}')">
+                            <option value="scale">Linear Scale Rating Parameter (1 - 5)</option>
+                            <option value="mc">Multiple Choice Field (With Correct Key Select)</option>
+                            <option value="paragraph">Open-Ended Answer Field (Paragraph Text Output)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="q-options-wrapper" id="opt_wrapper_${uid}">
+                    <div class="text-muted" style="font-size:13px; font-style:italic;"><i class="bi bi-info-circle"></i> Yields an evaluation assessment index score framework scale (1: Deficiency Found -> 5: Competency Mastered Standard).</div>
+                </div>
+                <div class="gform-footer">
+                    <button type="button" class="btn btn-secondary text-danger" onclick="removeGoogleFormQuestionBlock('${uid}')" style="padding: 6px 12px; font-size:13px;"><i class="bi bi-trash"></i> Delete Block Target</button>
+                </div>
+            `;
+            sandbox.appendChild(qCard);
+        }
+
+        function removeGoogleFormQuestionBlock(blockUid) {
+            const currentBlockElementsCount = document.querySelectorAll('#gformQuestionsSandbox .gform-card').length;
+            if (currentBlockElementsCount > 1) {
+                document.getElementById(blockUid).remove();
+            } else {
+                alert("An evaluation schema standard build file structural mapping matrix constraint requires at least one target field card element.");
+            }
+        }
+
+        function toggleFormQuestionTypeOptions(blockUid) {
+            const cardNode = document.getElementById(blockUid);
+            const selectedType = cardNode.querySelector('.q-type-selector').value;
+            const optionsWrapper = document.getElementById(`opt_wrapper_${blockUid}`);
+            
+            if (selectedType === 'scale') {
+                optionsWrapper.innerHTML = `<div class="text-muted" style="font-size:13px; font-style:italic;"><i class="bi bi-info-circle"></i> Yields an evaluation assessment index score framework scale (1: Deficiency Found -> 5: Competency Mastered Standard).</div>`;
+            } else if (selectedType === 'paragraph') {
+                optionsWrapper.innerHTML = `
+                    <div style="border: 1px dashed var(--border-color); padding: 12px; border-radius:6px; background: rgba(255,255,255,0.02);">
+                        <textarea class="form-input" disabled placeholder="Trainee open-ended runtime narrative text response field canvas area allocation..." rows="2" style="background:transparent; resize:none; font-size:13px; border:none; color:#aaa;"></textarea>
+                    </div>
+                `;
+            } else if (selectedType === 'mc') {
+                optionsWrapper.innerHTML = `
+                    <div class="mc-options-list" style="margin-top:10px;">
+                        <div class="flex align-center gap-10 mb-10 option-row">
+                            <input type="radio" name="correct_key_radio_${blockUid}" class="correct-key-radio-select" checked style="width:16px; height:16px;">
+                            <input type="text" class="form-input mc-opt-value" style="flex:1; padding:6px 12px;" value="Exceeds Expectations Verified Index Standard" required>
+                        </div>
+                        <div class="flex align-center gap-10 mb-10 option-row">
+                            <input type="radio" name="correct_key_radio_${blockUid}" class="correct-key-radio-select" style="width:16px; height:16px;">
+                            <input type="text" class="form-input mc-opt-value" style="flex:1; padding:6px 12px;" value="Requires Focused Skills Remediation Matrix Paths" required>
+                        </div>
+                    </div>
+                    <div class="flex justify-between align-center mt-10">
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="appendMultipleChoiceOptionRow('${blockUid}')" style="padding:4px 8px; font-size:11px;"><i class="bi bi-plus"></i> Append Choice Options Row String</button>
+                        <span style="font-size:11px; color:var(--success-color); font-style:italic;"><i class="bi bi-check-circle"></i> Select radio point indicator to assign the Correct Answer Key item.</span>
+                    </div>
+                `;
+            }
+        }
+
+        function appendMultipleChoiceOptionRow(blockUid) {
+            const optionsListContainer = document.querySelector(`#opt_wrapper_${blockUid} .mc-options-list`);
+            const optRow = document.createElement('div');
+            optRow.className = "flex align-center gap-10 mb-10 option-row";
+            optRow.innerHTML = `
+                <input type="radio" name="correct_key_radio_${blockUid}" class="correct-key-radio-select" style="width:16px; height:16px;">
+                <input type="text" class="form-input mc-opt-value" placeholder="Dynamic Option Choice Vector" style="flex:1; padding:6px 12px;" required>
+                <button type="button" style="background:transparent; border:none; color:var(--accent-color); cursor:pointer; font-size:16px;" onclick="this.parentElement.remove()"><i class="bi bi-x-circle-fill"></i></button>
+            `;
+            optionsListContainer.appendChild(optRow);
+        }
+
+        function commitGoogleFormTemplate(e) {
+            e.preventDefault();
+            const formTitle = document.getElementById('gformTitle').value.trim();
+            const formDesc = document.getElementById('gformDesc').value.trim();
+            const targetedCourseConstraint = document.getElementById('gformTargetCourseRestriction').value;
+            const compiledCards = document.querySelectorAll('#gformQuestionsSandbox .gform-card');
+
+            let schemaQuestionsArray = [];
+            compiledCards.forEach(card => {
+                const questionText = card.querySelector('.q-text-value').value.trim();
+                const questionType = card.querySelector('.q-type-selector').value;
+                
+                let qDefinitionNode = { type: questionType, text: questionText };
+                
+                if (questionType === 'mc') {
+                    let choices = [];
+                    let determinedCorrectStringValue = "";
+                    const optionRows = card.querySelectorAll('.option-row');
+                    
+                    optionRows.forEach(row => {
+                        const optionTextString = row.querySelector('.mc-opt-value').value.trim();
+                        choices.push(optionTextString);
+                        if(row.querySelector('.correct-key-radio-select').checked) {
+                            determinedCorrectStringValue = optionTextString;
+                        }
+                    });
+                    qDefinitionNode.options = choices;
+                    qDefinitionNode.correctAns = determinedCorrectStringValue || choices[0];
+                }
+                schemaQuestionsArray.push(qDefinitionNode);
+            });
+
+            DISTRIBUTED_EVALUATIONS_DB.push({
+                id: "eval_published_" + Date.now(),
+                title: formTitle,
+                description: formDesc,
+                targetCourse: targetedCourseConstraint,
+                questions: schemaQuestionsArray,
+                submittedResponsesLogs: []
+            });
+
+            alert(`Google Forms Evaluation distributed successfully!`);
+            resetGoogleFormsCanvas();
+            switchTrainerHubViewMode('tracker');
+        }
+
+        // --- TRAINEE CONTROLLER: ANSWERING FEED SYSTEM ---
+        function renderTraineeEvaluationFeedList() {
+            document.getElementById('evalActiveFormWorkspace').style.display = 'none';
+            document.getElementById('evalFeedListView').style.display = 'block';
+            
+            const feedContainer = document.getElementById('traineeEvalFeedContainer');
+            feedContainer.innerHTML = "";
+
+            const targetedFormsCollection = DISTRIBUTED_EVALUATIONS_DB.filter(ev => 
+                ev.targetCourse === "All Tracks" || ev.targetCourse === CURRENT_ACTIVE_SESSION_USER.track
+            );
+
+            if (targetedFormsCollection.length === 0) {
+                feedContainer.innerHTML = `<p class="text-muted" style="text-align:center; padding: 20px 0;">No pending evaluation matrices mapped to your profile track.</p>`;
+                return;
+            }
+
+            targetedFormsCollection.forEach(evalBlock => {
+                const isAlreadySubmitted = evalBlock.submittedResponsesLogs.some(r => r.userEmail === CURRENT_ACTIVE_SESSION_USER.email);
+                
+                const itemRow = document.createElement('div');
+                itemRow.className = "learning-item";
+                itemRow.style.display = "flex";
+                itemRow.style.justifyContent = "between";
+                itemRow.style.alignItems = "center";
+                
+                const badgeStatus = isAlreadySubmitted ? 
+                    `<span class="badge badge-success">Completed Submission Matrix</span>` : 
+                    `<span class="badge badge-warning">Awaiting Response Input</span>`;
+                
+                const actionTriggerButton = !isAlreadySubmitted ? 
+                    `<button class="btn btn-primary btn-sm" onclick="openEvaluationWorkspace('${evalBlock.id}')">Launch Assessment Workspace</button>` : 
+                    `<button class="btn btn-secondary btn-sm" disabled style="opacity:0.4;">Submission Archived</button>`;
+
+                itemRow.innerHTML = `
+                    <div style="flex:1;">
+                        <div class="learning-title" style="font-weight:600; font-size:16px; color:#fff;">${evalBlock.title}</div>
+                        <div class="text-muted" style="font-size:13px; margin-top:4px;">${evalBlock.description}</div>
+                        <div style="margin-top:8px;"><span class="pill-accent" style="margin-right:10px;"><i class="bi bi-shield-lock"></i> Track Scope: ${evalBlock.targetCourse}</span> ${badgeStatus}</div>
+                    </div>
+                    <div>${actionTriggerButton}</div>
+                `;
+                feedContainer.appendChild(itemRow);
+            });
+            updateTraineeBadgeCounters();
+        }
+
+        let CURRENTLY_OPENED_WORKSPACE_EVAL_ID = null;
+
+        function openEvaluationWorkspace(evaluationId) {
+            const selectedEvalObj = DISTRIBUTED_EVALUATIONS_DB.find(ev => ev.id === evaluationId);
+            if (!selectedEvalObj) return;
+
+            CURRENTLY_OPENED_WORKSPACE_EVAL_ID = evaluationId;
+            
+            document.getElementById('evalFeedListView').style.display = 'none';
+            document.getElementById('evalActiveFormWorkspace').style.display = 'block';
+
+            document.getElementById('activeWorkspaceTitle').innerText = selectedEvalObj.title;
+            document.getElementById('activeWorkspaceDesc').innerText = selectedEvalObj.description;
+
+            const questionsContainer = document.getElementById('activeWorkspaceQuestionsContainer');
+            questionsContainer.innerHTML = "";
+
+            selectedEvalObj.questions.forEach((q, idx) => {
+                const qCard = document.createElement('div');
+                qCard.className = "card";
+                qCard.innerHTML = `<div class="form-label" style="font-size:16px; font-weight:600; margin-bottom:15px; color:#fff;">${idx + 1}. ${q.text}</div>`;
+                
+                if (q.type === 'scale') {
+                    let scaleMarkupOptions = `<div style="display:flex; justify-content:space-between; max-width:400px; margin: 10px 0;">`;
+                    for(let i=1; i<=5; i++) {
+                        scaleMarkupOptions += `
+                            <div style="text-align:center;">
+                                <input type="radio" name="workspace_q_index_${idx}" value="${i}" id="scale_entry_${idx}_${i}" required style="width:20px; height:20px; cursor:pointer;">
+                                <label for="scale_entry_${idx}_${i}" style="display:block; font-size:12px; margin-top:4px; color:#aaa;">${i}</label>
+                            </div>
+                        `;
+                    }
+                    scaleMarkupOptions += `</div><div class="flex justify-between" style="max-width:400px; font-size:11px; color:#888;"><span>1 - Deficiency Found</span><span>5 - Mastered Competency</span></div>`;
+                    qCard.innerHTML += scaleMarkupOptions;
+                } else if (q.type === 'paragraph') {
+                    qCard.innerHTML += `
+                        <div class="form-group">
+                            <textarea class="form-input answer-paragraph-input-node" data-qindex="${idx}" placeholder="Type your narrative open-ended appraisal response text insights here completely..." rows="4" required style="background-color: var(--surface-bg); color:#fff;"></textarea>
+                        </div>
+                    `;
+                } else if (q.type === 'mc') {
+                    let mcMarkupOptions = `<div style="margin: 10px 0;">`;
+                    q.options.forEach((optValue, optIdx) => {
+                        mcMarkupOptions += `
+                            <div class="eval-option-row">
+                                <input type="radio" name="workspace_q_index_${idx}" value="${optValue}" id="mc_entry_${idx}_${optIdx}" required style="width:18px; height:18px; cursor:pointer;">
+                                <label for="mc_entry_${idx}_${optIdx}" style="color:#aaa; cursor:pointer; font-size:14px;">${optValue}</label>
+                            </div>
+                        `;
+                    });
+                    mcMarkupOptions += `</div>`;
+                    qCard.innerHTML += mcMarkupOptions;
+                }
+                questionsContainer.appendChild(qCard);
+            });
+        }
+
+        function exitEvaluationWorkspace() {
+            document.getElementById('evalActiveFormWorkspace').style.display = 'none';
+            document.getElementById('evalFeedListView').style.display = 'block';
+            renderTraineeEvaluationFeedList();
+        }
+
+        function submitTraineeFormAnswers(e) {
+            e.preventDefault();
+            const targetEvalRecord = DISTRIBUTED_EVALUATIONS_DB.find(ev => ev.id === CURRENTLY_OPENED_WORKSPACE_EVAL_ID);
+            if (!targetEvalRecord) return;
+
+            let structuralCapturedAnswersCollector = [];
+            targetEvalRecord.questions.forEach((q, idx) => {
+                let userInputValueString = "";
+                if(q.type === 'paragraph') {
+                    const txtArea = document.querySelector(`.answer-paragraph-input-node[data-qindex="${idx}"]`);
+                    userInputValueString = txtArea ? txtArea.value.trim() : "";
+                } else {
+                    const selectedRadioInput = document.querySelector(`input[name="workspace_q_index_${idx}"]:checked`);
+                    userInputValueString = selectedRadioInput ? selectedRadioInput.value : "";
+                }
+                structuralCapturedAnswersCollector.push({ questionText: q.text, type: q.type, userAnswer: userInputValueString });
+            });
+
+            const formattingLogTimestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
+            targetEvalRecord.submittedResponsesLogs.push({
+                userEmail: CURRENT_ACTIVE_SESSION_USER.email,
+                userName: CURRENT_ACTIVE_SESSION_USER.firstName + " " + CURRENT_ACTIVE_SESSION_USER.lastName,
+                submittedAt: formattingLogTimestamp,
+                isGraded: false,
+                assignedTotalScore: "Awaiting Verification",
+                answers: structuralCapturedAnswersCollector
+            });
+
+            alert("Evaluation submitted successfully!");
+            exitEvaluationWorkspace();
+        }
+
+        // --- SECTION 10 CONTROLLER: ADMIN ACCESS CONTROL CREATION NODES ---
+        function renderAdminActiveProfilesPasswordLedgerPanel() {
+            const listPanelContainer = document.getElementById('adminActiveUsersPasswordResetOverrideContainer');
+            if(!listPanelContainer) return;
+            listPanelContainer.innerHTML = "";
+
+            Object.keys(SYSTEM_USERS_REPOSITORY).forEach(userEmailKey => {
+                const record = SYSTEM_USERS_REPOSITORY[userEmailKey];
+                
+                const itemRow = document.createElement('div');
+                itemRow.style.padding = "12px";
+                itemRow.style.background = "var(--surface-bg)";
+                itemRow.style.borderRadius = "8px";
+                itemRow.style.marginBottom = "10px";
+                itemRow.style.border = "1px solid var(--border-color)";
+                
+                itemRow.innerHTML = `
+                    <div class="flex justify-between align-center">
+                        <div>
+                            <strong style="color:#fff; font-size:14px;">${record.firstName} ${record.lastName}</strong>
+                            <div style="font-size:11px; color:#aaa; font-family:monospace; margin-top:2px;">${userEmailKey}</div>
+                            <div style="font-size:11px; color:var(--theme-pill-text); margin-top:4px;"><i class="bi bi-briefcase"></i> ${record.jobTitle} | <span style="text-transform:uppercase;">${record.role}</span></div>
+                            <div style="font-size:11px; color:#64748b; margin-top:2px; font-family:monospace;">Active Key: ${record.password}</div>
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-secondary text-danger" style="padding:4px 8px; font-size:11px;" onclick="executeAdminForcedPasswordReset('${userEmailKey}')"><i class="bi bi-arrow-counterclockwise"></i> Reset Pass</button>
+                        </div>
+                    </div>
+                `;
+                listPanelContainer.appendChild(itemRow);
+            });
+            
+            const totalLabel = document.getElementById('lblAdminTotalUsers');
+            if(totalLabel) totalLabel.innerText = Object.keys(SYSTEM_USERS_REPOSITORY).length;
+        }
+
+        function executeAdminAccountProvisioning(e) {
+            e.preventDefault();
+            
+            const first = document.getElementById('adminNewUserFirst').value.trim();
+            const last = document.getElementById('adminNewUserLast').value.trim();
+            const email = document.getElementById('adminNewUserEmail').value.trim();
+            const jobTitle = document.getElementById('adminNewUserJobTitle').value.trim();
+            const sysRole = document.getElementById('adminNewUserSysRole').value;
+            const track = document.getElementById('adminNewUserTrack').value;
+            const pass = document.getElementById('adminNewUserPass').value;
+
+            if(SYSTEM_USERS_REPOSITORY.hasOwnProperty(email)) {
+                alert("An identity block entry already maps to that corporate tracking email token key destination.");
+                return;
+            }
+
+            SYSTEM_USERS_REPOSITORY[email] = {
+                password: pass,
+                role: sysRole,
+                firstName: first,
+                lastName: last,
+                jobTitle: jobTitle,
+                track: track,
+                baselinePct: sysRole === 'trainee' ? "50%" : "100%"
+            };
+
+            alert(`Account Node generated successfully for ${first} ${last}.\nPermissions mapped: ${sysRole}`);
+            
+            document.getElementById('frmAdminCreateUserAccount').reset();
+            document.getElementById('adminNewUserPass').value = "TemporaryPass123!";
+            renderAdminActiveProfilesPasswordLedgerPanel();
+        }
+
+        function executeAdminForcedPasswordReset(targetUserEmailAddressKey) {
+            const record = SYSTEM_USERS_REPOSITORY[targetUserEmailAddressKey];
+            if(!record) return;
+
+            const freshlyGeneratedPasswordStringToken = "ResetToken" + Math.floor(1000 + Math.random() * 9000) + "!";
+            record.password = freshlyGeneratedPasswordStringToken;
+
+            alert(`Credential override successful.\nTarget Node Profile: ${record.firstName} ${record.lastName}\nNew Immutable Credential Key: ${freshlyGeneratedPasswordStringToken}`);
+            renderAdminActiveProfilesPasswordLedgerPanel();
+        }
+
+        // INITIALIZATION DEPLOYMENT BINDINGS
+        window.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('mainDashboard').style.display = 'none';
+            document.getElementById('loginPage').style.display = 'block';
+        });
+
+        function openCompetencyModal(title, percent, level, desc, category, tags) {
+
+        document.getElementById('modalCompTitle').innerText = title;
+        document.getElementById('modalCompPercent').innerText = percent;
+        document.getElementById('modalCompLevel').innerText = level;
+        document.getElementById('modalCompDescription').innerText = desc;
+        document.getElementById('modalCompCategory').innerText = category;
+
+        document.getElementById('modalProgressFill').style.width = percent;
+
+        const tagsContainer = document.getElementById('modalCompTags');
+
+        tagsContainer.innerHTML = '';
+
+        tags.split(',').forEach(tag => {
+
+            const pill = document.createElement('div');
+
+            pill.className = 'competency-tag';
+
+            pill.innerText = tag.trim();
+
+            tagsContainer.appendChild(pill);
+
+        });
+
+        document.getElementById('competencyModal').classList.add('active');
+    }
+
+    function closeCompetencyModal() {
+        document.getElementById('competencyModal').classList.remove('active');
+    }
+    
+    document.querySelectorAll(
+    '.trainer-appraisal-card'
+    );
+
+    const trainerCourseFilter =
+    document.querySelectorAll(
+    '.evaluation-filter-select'
+    )[3] || {};
+
+    const trainerStatusFilter =
+    document.querySelectorAll(
+    '.evaluation-filter-select'
+    )[4] || {};
+
+    function filterTrainerAppraisals(){
+
+        const course =
+        trainerCourseFilter.value;
+
+        const status =
+        trainerStatusFilter.value;
+
+        document
+        .querySelectorAll(
+            '.trainer-appraisal-card'
+        )
+        .forEach(card => {
+
+            const courseText =
+            card.querySelector(
+                '.trainer-appraisal-course'
+            ).innerText;
+
+            const statusText =
+            card.querySelector(
+                '.evaluation-status-pill'
+            ).innerText;
+
+            let show = true;
+
+            if(
+                course !==
+                'By Training Course'
+                &&
+                !courseText.includes(course)
+            ){
+                show = false;
+            }
+
+            if(
+                status !== 'All Status'
+                &&
+                statusText !== status
+            ){
+                show = false;
+            }
+
+            card.style.display =
+                show ? 'block' : 'none';
+
+        });
+
+    }
+
+    trainerCourseFilter.addEventListener(
+        'change',
+        filterTrainerAppraisals
+    );
+
+    trainerStatusFilter.addEventListener(
+        'change',
+        filterTrainerAppraisals
+    );
+
+    </script>
+
+        <div class="competency-modal-overlay" id="competencyModal">
+
+        <div class="competency-modal-card">
+
+            <div class="competency-modal-top">
+                <div>
+                    <h2 id="modalCompTitle">Competency</h2>
+                    <p id="modalCompCategory">Category</p>
+                </div>
+
+                <button onclick="closeCompetencyModal()" class="modal-close-btn">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+
+            <div class="competency-modal-section">
+                <span>Current Proficiency</span>
+                <strong id="modalCompPercent">0%</strong>
+            </div>
+
+            <div class="progress-bar competency-progress">
+                <div class="progress-fill" id="modalProgressFill" style="width:0%;"></div>
+            </div>
+
+            <div class="competency-modal-section">
+                <span>Level</span>
+                <strong id="modalCompLevel">Advanced</strong>
+            </div>
+
+            <div class="competency-modal-description" id="modalCompDescription">
+                Description
+            </div>
+
+            <div class="competency-modal-tags" id="modalCompTags"></div>
+
+        </div>
+
+    </div>
+
+    <script>
+        async function loadTrainerGapMonitor(userId) {
+            try {
+                const response =
+                    await fetch(
+                        `api/get_skill_gaps.php?user_id=${userId}`
+                    );
+
+                const gaps = await response.json();
+                renderTrainerGapCards(gaps);
+
+            } catch(error) {
+                console.error(
+                    "Trainer gap monitor error:",
+                    error
+                );
+            }
+        }
+
+        function renderTrainerGapCards(gaps) {
+            const list =
+                document.getElementById(
+                    'trainerGapList'
+                );
+            const chart =
+                document.getElementById(
+                    'trainerGapChart'
+                );
+
+            if(!list || !chart) return;
+            list.innerHTML = '';
+            chart.innerHTML = '';
+
+            let criticalCount = 0;
+            let readinessTotal = 0;
+
+            const departments = {};
+
+            gaps.forEach((gap,index)=>{
+                const current =
+                    Math.max(
+                        5,
+                        100 - (gap.gap_score * 10)
+                    );
+                const target =
+                    Math.min(
+                        95,
+                        current + 35
+                    );
+                const isCritical =
+                    current < 50;
+
+                if(isCritical) {
+                    criticalCount++;
+                }
+                readinessTotal += current;
+                const dept =
+                    detectDepartment(
+                        gap.skill_name
+                    );
+
+                if(!departments[dept]) {
+                    departments[dept] = 0;
+                }
+                departments[dept]++;
+                const affected =
+                    Math.floor(
+                        Math.random() * 30
+                    ) + 5;
+
+                list.innerHTML += `
+                
+                <div class="trainer-gap-item">
+
+                    <div class="trainer-gap-item-top">
+
+                        <div class="trainer-gap-item-icon">
+                            <i class="bi bi-bar-chart"></i>
+                        </div>
+
+                        <div class="trainer-gap-item-main">
+
+                            <div class="trainer-gap-item-header">
+
+                                <div>
+
+                                    <div class="trainer-gap-item-title">
+                                        ${gap.skill_name}
+                                    </div>
+
+                                    <div class="trainer-gap-item-dept">
+                                        ${dept}
+                                    </div>
+
+                                </div>
+
+                                <div class="
+                                    trainer-gap-status
+                                    ${isCritical ? 'danger' : 'success'}
+                                ">
+                                    ${isCritical ? 'Gap' : 'Met'}
+                                </div>
+
+                            </div>
+
+                            <div class="trainer-gap-progress-label">
+
+                                <span>
+                                    Proficiency Level
+                                </span>
+
+                                <strong>
+                                    ${current}% / ${target}%
+                                </strong>
+
+                            </div>
+
+                            <div class="trainer-gap-progress">
+
+                                <div
+                                    class="
+                                        trainer-gap-progress-fill
+                                        ${isCritical ? 'danger' : 'success'}
+                                    "
+                                    style="width:${current}%"
+                                ></div>
+
+                            </div>
+
+                            <div class="trainer-gap-meta">
+                                ${affected} employees affected
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+                `;
+
+            });
+
+            Object.keys(departments)
+            .forEach((dept)=>{
+
+                const height =
+                    Math.min(
+                        100,
+                        departments[dept] * 25
+                    );
+
+                chart.innerHTML += `
+
+                <div class="trainer-gap-bar-wrap">
+
+                    <div
+                        class="trainer-gap-bar"
+                        style="height:${height}%"
+                    ></div>
+
+                    <span>
+                        ${dept.substring(0,3)}
+                    </span>
+
+                </div>
+
+                `;
+
+            });
+
+            const avgReadiness =
+                gaps.length
+                ? Math.round(
+                    readinessTotal / gaps.length
+                )
+                : 0;
+
+            document.getElementById(
+                'trainerCriticalGapCount'
+            ).textContent = criticalCount;
+
+            document.getElementById(
+                'trainerReadinessScore'
+            ).textContent =
+                avgReadiness + '%';
+
+        }
+
+        function detectDepartment(skill) {
+
+            skill = skill.toLowerCase();
+
+            if(
+                skill.includes('design') ||
+                skill.includes('ux') ||
+                skill.includes('ui')
+            ) {
+                return 'Design';
+            }
+
+            if(
+                skill.includes('cloud') ||
+                skill.includes('dev') ||
+                skill.includes('code') ||
+                skill.includes('system')
+            ) {
+                return 'Engineering';
+            }
+
+            if(
+                skill.includes('security') ||
+                skill.includes('network')
+            ) {
+                return 'Operations';
+            }
+
+            return 'General';
+
+        }
+
+        </script>
+</body>
+</html>
